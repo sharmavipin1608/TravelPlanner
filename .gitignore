@@ -33,3 +33,16 @@ Thumbs.db
 
 # Superpowers brainstorming sessions
 .superpowers/
+
+# Logs (keep directory structure, ignore content)
+logs/tool_calls.log
+logs/agent_calls.log
+logs/traces/
+
+# Memory scratchpad (ephemeral, not for git)
+memory/scratchpad.md
+memory/session_checkpoint.md
+
+# Python cache
+__pycache__/
+*.py[cod]
