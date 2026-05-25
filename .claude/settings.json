@@ -1,17 +1,17 @@
 {
   "hooks": {
     "PreToolUse": [
-      { "type": "command", "command": "bash hooks/pre_task.sh" },
-      { "type": "command", "command": "bash hooks/classify_task.sh" },
-      { "type": "command", "command": "bash hooks/budget_guard.sh" },
-      { "type": "command", "command": "bash hooks/log_tool.sh" }
+      { "matcher": "", "hooks": [{ "type": "command", "command": "bash hooks/pre_task.sh" }] },
+      { "matcher": "", "hooks": [{ "type": "command", "command": "bash hooks/classify_task.sh" }] },
+      { "matcher": "", "hooks": [{ "type": "command", "command": "bash hooks/budget_guard.sh" }] },
+      { "matcher": "", "hooks": [{ "type": "command", "command": "bash hooks/log_tool.sh" }] }
     ],
     "PostToolUse": [
-      { "type": "command", "command": "bash hooks/post_task.sh" },
-      { "type": "command", "command": "bash hooks/log_tool.sh" }
+      { "matcher": "", "hooks": [{ "type": "command", "command": "bash hooks/post_task.sh" }] },
+      { "matcher": "", "hooks": [{ "type": "command", "command": "bash hooks/log_tool.sh" }] }
     ],
     "Stop": [
-      { "type": "command", "command": "bash hooks/on_error.sh" }
+      { "matcher": "", "hooks": [{ "type": "command", "command": "bash hooks/on_error.sh" }] }
     ]
   },
   "agents": {
