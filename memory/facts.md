@@ -52,7 +52,10 @@
 [api] GET /api/trip-items?trip_id= returns string[] of item_ids for that trip; PATCH /api/items accepts {id, lat, lng} to backfill coordinates
 [api] POST /api/trip-items verifies trip and item ownership (trips.user_id + items.user_id) before insert — defense-in-depth on top of RLS
 [api] POST /api/categorize calls AIService.categorize(raw_text) and returns CategorizedItem; does NOT write to DB
+[devops] GitHub Actions CI: .github/workflows/ci.yml runs functional.spec.ts + trip-persistence.spec.ts + cluster-marker-svg.spec.ts on every push/PR; debug/diagnostic specs excluded from CI
+[devops] main branch is protected: PRs required, CI must pass (strict — branch must be up to date), no direct pushes; enforced via GitHub branch protection API
+[devops] CI secrets required in GitHub repo: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, NEXT_PUBLIC_GOOGLE_MAPS_KEY
 [ui] Sidebar: fixed left 380px; DestinationChips + CategoryGrid + ItemList + ActiveTripPill; CategoryGrid toggle is idempotent (re-click resets to 'all')
-[ui] MapView: APIProvider + Map from @vis.gl/react-google-maps; world mode = ClusterMarker per dest; local mode = PinMarker per item; uses AdvancedMarker with div+useEffect for innerHTML pins (not JSX children)
+[ui] MapView: APIProvider + Map from @vis.gl/react-google-maps; world mode = ClusterMarker per dest; local mode = PinMarker per item; uses AdvancedMarker with div+ref-callback for innerHTML pins (not JSX children)
 [ui] window.__tpMap = { zoomIn, zoomOut } — global handle for ZoomControls; set in useEffect after map loads
 [ui] ItemCard: position absolute top:80px left:396px; entrance animation via requestAnimationFrame; active trip toggles button color green
