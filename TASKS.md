@@ -147,7 +147,7 @@ Create `src/lib/ai/types.ts`, `ai-service.ts`, all 4 providers (mock/claude/open
 ---
 
 ### [TASK-010] API routes
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [api] [supabase]
@@ -191,7 +191,7 @@ Build `src/components/ui/icon.tsx` (SVG registry for all icons), `modal-base.tsx
 ---
 
 ### [TASK-014] Sidebar
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [sidebar]
@@ -202,7 +202,7 @@ Build all sidebar sub-components: `destination-chips.tsx`, `category-grid.tsx` (
 ---
 
 ### [TASK-015] MapView (world/local modes + markers)
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [maps] [ui]
@@ -213,7 +213,7 @@ Build `map-view.tsx` ('use client', APIProvider + Map, world/local mode, fitBoun
 ---
 
 ### [TASK-016] Item card overlay
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [maps]
