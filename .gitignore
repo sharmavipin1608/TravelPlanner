@@ -46,3 +46,6 @@ memory/session_checkpoint.md
 # Python cache
 __pycache__/
 *.py[cod]
+
+# Worktrees
+.worktrees/
