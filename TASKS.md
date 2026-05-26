@@ -279,7 +279,7 @@ Write and run unit tests: place-type-map (5 cases), ai-service (MockProvider hap
 ---
 
 ### [TASK-022] Integration tests
-**Status:** in_progress
+**Status:** completed
 **Priority:** high
 **Agent:** tester
 **Tags:** [testing] [api]

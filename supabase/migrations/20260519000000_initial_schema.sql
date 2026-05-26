@@ -9,7 +9,7 @@ CREATE TYPE item_status   AS ENUM ('wishlist', 'planned', 'visited');
 -- ── items ────────────────────────────────────────────────────
 CREATE TABLE items (
   id                uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id           uuid        NOT NULL REFERENCES auth.users ON DELETE CASCADE,
+  user_id           uuid        NOT NULL DEFAULT auth.uid() REFERENCES auth.users ON DELETE CASCADE,
   name              text        NOT NULL,
   category          item_category,          -- null = pending AI categorization
   google_place_types text[],               -- raw types from Google Places API
@@ -29,7 +29,7 @@ CREATE INDEX idx_items_user_category    ON items (user_id, category);
 -- ── trips ────────────────────────────────────────────────────
 CREATE TABLE trips (
   id           uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id      uuid        NOT NULL REFERENCES auth.users ON DELETE CASCADE,
+  user_id      uuid        NOT NULL DEFAULT auth.uid() REFERENCES auth.users ON DELETE CASCADE,
   name         text        NOT NULL,
   destination  text,
   start_date   date,
@@ -51,7 +51,7 @@ CREATE INDEX idx_trip_items_trip ON trip_items (trip_id);
 -- ── scratchpad_entries ───────────────────────────────────────
 CREATE TABLE scratchpad_entries (
   id              uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id         uuid        NOT NULL REFERENCES auth.users ON DELETE CASCADE,
+  user_id         uuid        NOT NULL DEFAULT auth.uid() REFERENCES auth.users ON DELETE CASCADE,
   raw_text        text        NOT NULL,
   processed       boolean     NOT NULL DEFAULT false,
   created_item_id uuid        REFERENCES items ON DELETE SET NULL,
