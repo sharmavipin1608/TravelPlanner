@@ -118,9 +118,16 @@ export default function MapPage() {
           onSave={(item) => {
             setItems((prev) => [...prev, item])
             setModal(null)
-            // Only zoom to destination if the item has real coordinates
+            // Only switch to local mode (showing pins) if already viewing this destination,
+            // or if no destination filter is active yet and the item has coordinates.
+            // Never silently replace an existing destination filter — that hides the user's list.
             if (item.destination && item.lat != null && item.lng != null) {
-              setFilters((f) => ({ ...f, destination: item.destination as string }))
+              setFilters((f) => {
+                if (f.destination === null || f.destination === item.destination) {
+                  return { ...f, destination: item.destination as string }
+                }
+                return f
+              })
             }
           }}
         />
@@ -133,9 +140,15 @@ export default function MapPage() {
           onSaved={(item, entryId) => {
             setItems((prev) => [...prev, item])
             setScratchpadEntries((prev) => prev.filter((e) => e.id !== entryId))
-            // Zoom to destination (cluster marker) so user sees their saved place
+            // Only switch to local mode if already viewing this destination.
+            // Scratchpad items have no coordinates so we can't show a pin anyway.
             if (item.destination) {
-              setFilters((f) => ({ ...f, destination: item.destination as string }))
+              setFilters((f) => {
+                if (f.destination === item.destination) {
+                  return { ...f, destination: item.destination as string }
+                }
+                return f
+              })
             }
           }}
           onDiscarded={(entryId) => {

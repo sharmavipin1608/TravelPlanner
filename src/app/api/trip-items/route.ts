@@ -73,13 +73,17 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     const { error: insertError } = await supabase
       .from('trip_items')
-      .upsert({ trip_id: body.trip_id, item_id: body.item_id }, { onConflict: 'trip_id,item_id', ignoreDuplicates: true })
+      .insert({ trip_id: body.trip_id, item_id: body.item_id })
 
     if (insertError) {
-      return Response.json(
-        { data: null, error: { code: 'db_error', message: insertError.message } } satisfies ApiResponse<void>,
-        { status: 500 }
-      )
+      if (insertError.code === '23505') {
+        // Already in trip — treat as success, still update status below
+      } else {
+        return Response.json(
+          { data: null, error: { code: 'db_error', message: insertError.message } } satisfies ApiResponse<void>,
+          { status: 500 }
+        )
+      }
     }
 
     const { error: updateError } = await supabase

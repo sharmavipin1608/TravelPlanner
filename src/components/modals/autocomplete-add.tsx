@@ -427,6 +427,25 @@ function DetailForm({ detail, onBack, onSave, onClose, manualMode = false }: Det
           </div>
         )}
 
+        {/* Coordinates indicator */}
+        {!manualMode && (
+          <div
+            style={{
+              fontSize: 12,
+              color: detail.lat != null ? 'oklch(0.45 0.12 145)' : 'oklch(0.55 0.18 20)',
+              background: detail.lat != null ? 'oklch(0.95 0.04 145)' : 'oklch(0.97 0.04 20)',
+              border: `1px solid ${detail.lat != null ? 'oklch(0.85 0.08 145)' : 'oklch(0.88 0.1 20)'}`,
+              borderRadius: 6,
+              padding: '5px 10px',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            {detail.lat != null
+              ? `coords: ${detail.lat.toFixed(4)}, ${detail.lng!.toFixed(4)}`
+              : 'No coordinates — pin will not appear on map'}
+          </div>
+        )}
+
         {/* Google place types pills */}
         {detail.types.length > 0 && (
           <div>
@@ -677,6 +696,9 @@ export function AutocompleteAdd({ onClose, onSave, manualMode = false }: Autocom
           const types = result.types ?? []
           const lat = result.geometry?.location?.lat() ?? null
           const lng = result.geometry?.location?.lng() ?? null
+          if (lat == null || lng == null) {
+            console.warn('[autocomplete] getDetails: geometry missing for', prediction.place_id, result)
+          }
           const destination = extractDestination(result.address_components)
           setPlaceDetail({
             placeId: prediction.place_id,
@@ -687,6 +709,7 @@ export function AutocompleteAdd({ onClose, onSave, manualMode = false }: Autocom
             destination,
           })
         } else {
+          console.error('[autocomplete] getDetails failed:', status, 'for place_id:', prediction.place_id)
           // Fallback on error
           setPlaceDetail({
             placeId: prediction.place_id,
