@@ -73,11 +73,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     const { error: insertError } = await supabase
       .from('trip_items')
-      .insert({ trip_id: body.trip_id, item_id: body.item_id })
+      .upsert({ trip_id: body.trip_id, item_id: body.item_id }, { onConflict: 'trip_id,item_id', ignoreDuplicates: true })
 
     if (insertError) {
       return Response.json(
-        { data: null, error: { code: 'db_error', message: 'Internal server error' } } satisfies ApiResponse<void>,
+        { data: null, error: { code: 'db_error', message: insertError.message } } satisfies ApiResponse<void>,
         { status: 500 }
       )
     }
