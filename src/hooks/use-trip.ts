@@ -50,6 +50,14 @@ export function useTrip(trips: Trip[]) {
   const activateTrip = useCallback((id: string | null) => {
     setActiveTripId(id)
     setTripItemIds(new Set())
+    if (id) {
+      fetch(`/api/trip-items?trip_id=${id}`)
+        .then((r) => r.json())
+        .then((json) => {
+          if (json.data) setTripItemIds(new Set(json.data as string[]))
+        })
+        .catch(() => {})
+    }
   }, [])
 
   return {
