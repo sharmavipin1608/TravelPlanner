@@ -81,7 +81,7 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
       {/* Blue/indigo header accent */}
       <div
         style={{
-          background: 'oklch(0.92 0.05 252)',
+          background: 'oklch(0.96 0.04 280)',
           padding: '18px 20px 14px',
           borderRadius: '12px 12px 0 0',
         }}
@@ -126,9 +126,9 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
                 padding: '14px 16px',
                 background: '#fff',
                 border: isActive
-                  ? '.5px solid oklch(0.7 0.12 36)'
+                  ? '.5px solid oklch(0.55 0.18 280)'
                   : '.5px solid var(--line, rgba(60,50,30,.10))',
-                boxShadow: isActive ? '0 0 0 1px oklch(0.7 0.12 36) inset' : 'none',
+                boxShadow: isActive ? '0 0 0 1px oklch(0.55 0.18 280) inset' : 'none',
                 borderRadius: 10,
                 marginTop: 8,
                 cursor: 'pointer',
@@ -160,8 +160,8 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
                       fontSize: 10.5,
                       padding: '3px 8px',
                       borderRadius: 999,
-                      background: 'oklch(0.92 0.06 36)',
-                      color: 'oklch(0.4 0.12 36)',
+                      background: 'oklch(0.96 0.04 280)',
+                      color: 'oklch(0.40 0.18 280)',
                       letterSpacing: '0.04em',
                       textTransform: 'uppercase',
                     }}

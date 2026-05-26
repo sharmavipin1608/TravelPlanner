@@ -17,12 +17,21 @@ export function ActiveTripPill({ trip, stopCount, onDeactivate }: ActiveTripPill
         alignItems: 'center',
         gap: '8px',
         margin: '8px 16px',
-        background: 'oklch(0.82 0.12 80)',
+        background: 'oklch(0.92 0.05 280)',
+        border: '1px solid oklch(0.55 0.18 280)',
         borderRadius: '24px',
         padding: '8px 12px',
       }}
     >
-      <Icon name="suitcase" size={14} stroke="var(--ink)" />
+      <div
+        style={{
+          width: 7,
+          height: 7,
+          borderRadius: '50%',
+          background: 'oklch(0.55 0.18 280)',
+          flexShrink: 0,
+        }}
+      />
       <span
         style={{
           fontSize: '13px',
@@ -36,7 +45,7 @@ export function ActiveTripPill({ trip, stopCount, onDeactivate }: ActiveTripPill
       >
         {trip.name}
       </span>
-      <span style={{ fontSize: '12px', color: 'var(--ink-2)', flexShrink: 0 }}>
+      <span style={{ fontSize: '12px', color: 'oklch(0.40 0.18 280)', flexShrink: 0 }}>
         {stopCount} {stopCount === 1 ? 'stop' : 'stops'}
       </span>
       <button

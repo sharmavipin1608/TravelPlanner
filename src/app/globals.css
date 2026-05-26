@@ -36,8 +36,8 @@ body {
   --pad-y: 13px;  /* regular; compact=10px, comfy=18px */
 
   /* Amber (used for trip pill and triage badge) */
-  --amber:   oklch(0.82 0.12 80);
-  --amber-2: oklch(0.72 0.14 72);
+  --amber:   oklch(0.55 0.18 280);
+  --amber-2: oklch(0.92 0.05 280);
 }
 
 /* ─── Typography helpers ─────────────────────────────────── */
