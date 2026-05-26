@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Item, ScratchpadEntry, Category } from '@/types'
 import type { CategorizedItem } from '@/lib/ai/types'
 
@@ -17,9 +17,10 @@ interface ScratchpadRowProps {
   entry: ScratchpadEntry
   onSaved: (item: Item, entryId: string) => void
   onDiscarded: (entryId: string) => void
+  autoRun?: boolean
 }
 
-export function ScratchpadRow({ entry, onSaved, onDiscarded }: ScratchpadRowProps) {
+export function ScratchpadRow({ entry, onSaved, onDiscarded, autoRun = false }: ScratchpadRowProps) {
   const [state, setState] = useState<RowState>('pending')
   const [fields, setFields] = useState<ReviewFields>({
     name: '',
@@ -28,6 +29,11 @@ export function ScratchpadRow({ entry, onSaved, onDiscarded }: ScratchpadRowProp
     notes: '',
   })
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (autoRun) runCategorize()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function runCategorize() {
     setState('thinking')
@@ -84,24 +90,21 @@ export function ScratchpadRow({ entry, onSaved, onDiscarded }: ScratchpadRowProp
         marginBottom: 10,
       }}
     >
+      {/* Raw text always visible */}
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span style={{ fontSize: 13, fontStyle: 'italic', color: 'var(--ink-2)', flex: 1 }}>
+          &ldquo;{entry.raw_text}&rdquo;
+        </span>
+        <span style={{ fontSize: 11, color: 'var(--ink-3)', marginLeft: 10, flexShrink: 0 }}>
+          just now
+        </span>
+      </div>
+
       {state === 'pending' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <blockquote
-            style={{
-              margin: 0,
-              fontStyle: 'italic',
-              color: 'var(--ink-2)',
-              padding: '8px 12px',
-              borderLeft: '3px solid var(--paper-3)',
-            }}
-          >
-            {entry.raw_text}
-          </blockquote>
-          <div>
-            <button className="btn-primary" onClick={runCategorize}>
-              Sort it
-            </button>
-          </div>
+        <div>
+          <button className="btn-primary" onClick={runCategorize}>
+            Sort it
+          </button>
         </div>
       )}
 

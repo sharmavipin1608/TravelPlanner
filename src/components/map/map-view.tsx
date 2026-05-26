@@ -156,7 +156,7 @@ function MapInner({
 
 export function MapView(props: MapViewProps) {
   return (
-    <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''}>
+    <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''} libraries={['places']}>
       <Map
         defaultCenter={{ lat: 25, lng: 10 }}
         defaultZoom={2}

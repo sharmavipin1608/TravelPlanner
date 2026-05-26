@@ -16,6 +16,7 @@ interface ScratchpadProps {
 export function Scratchpad({ entries, onClose, onSaved, onDiscarded }: ScratchpadProps) {
   const [composeText, setComposeText] = useState('')
   const [composeEntries, setComposeEntries] = useState<ScratchpadEntry[]>([])
+  const [autoRunIds, setAutoRunIds] = useState<Set<string>>(new Set())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   function handleComposeInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -37,6 +38,7 @@ export function Scratchpad({ entries, onClose, onSaved, onDiscarded }: Scratchpa
       created_at: new Date().toISOString(),
     }
     setComposeEntries((prev) => [tempEntry, ...prev])
+    setAutoRunIds((prev) => new Set([...prev, tempEntry.id]))
     setComposeText('')
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
   }
@@ -121,6 +123,7 @@ export function Scratchpad({ entries, onClose, onSaved, onDiscarded }: Scratchpa
             entry={entry}
             onSaved={handleSaved}
             onDiscarded={handleDiscarded}
+            autoRun={autoRunIds.has(entry.id)}
           />
         ))}
 
