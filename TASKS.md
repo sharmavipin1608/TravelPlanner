@@ -224,7 +224,7 @@ Build `src/components/map/item-card.tsx`. Floating 340px card, slide-in animatio
 ---
 
 ### [TASK-017] AddMenu + AutocompleteAdd modal
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [maps] [places]
@@ -235,7 +235,7 @@ Build `add-menu.tsx` (3-row popup above FAB, closes on outside click). Build `au
 ---
 
 ### [TASK-018] Scratchpad modal
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [ai] [scratchpad]
@@ -246,7 +246,7 @@ Build `scratchpad-row.tsx` (per-entry state machine: pending→thinking→review
 ---
 
 ### [TASK-019] Trips modal + Settings modal
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [trips]
@@ -257,7 +257,7 @@ Build `trips-modal.tsx` (trip list + inline create form + activate on tap). Buil
 ---
 
 ### [TASK-020] /map page composition
-**Status:** pending
+**Status:** in_progress
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [core]
