@@ -1,6 +1,10 @@
 import type { Category } from '@/types'
 import { CATEGORY_META } from './category-meta'
 
+function escSVG(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 function pieSlicePath(r: number, a0: number, a1: number): string {
   const x0 = r * Math.cos(a0), y0 = r * Math.sin(a0)
   const x1 = r * Math.cos(a1), y1 = r * Math.sin(a1)
@@ -38,7 +42,7 @@ export function clusterHTML(
       <text text-anchor="middle" y="${r + 16}" font-size="11" font-weight="600"
             letter-spacing=".08em" font-family="Inter, system-ui, sans-serif"
             fill="#222"
-            style="paint-order:stroke;stroke:rgba(255,255,255,.9);stroke-width:3">${label}</text>
+            style="paint-order:stroke;stroke:rgba(255,255,255,.9);stroke-width:3">${escSVG(label)}</text>
     </svg>
   </div>`
 }
