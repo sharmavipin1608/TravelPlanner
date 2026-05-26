@@ -325,7 +325,7 @@ Plan ref: Task 2 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-026] Trip indigo color tokens
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [colors]
