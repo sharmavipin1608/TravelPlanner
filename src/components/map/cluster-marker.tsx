@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
-import { AdvancedMarker } from '@vis.gl/react-google-maps'
+import { AdvancedMarker, useMap } from '@vis.gl/react-google-maps'
 import type { Item, Category } from '@/types'
 import { clusterHTML } from '@/lib/google-maps/cluster-html'
 import { CITY_BBOX } from '@/lib/google-maps/city-bbox'
@@ -29,13 +29,15 @@ function getStaticPosition(dest: string, items: Item[]): LatLng | null {
 export function ClusterMarker({ dest, items, dimmed, onClick }: ClusterMarkerProps) {
   const divRef = useRef<HTMLDivElement>(null)
   const [geocoded, setGeocoded] = useState<LatLng | null>(null)
+  const map = useMap()
 
   const staticPos = getStaticPosition(dest, items)
   const position = staticPos ?? geocoded
 
-  // Geocode the destination when no static position is available
+  // Geocode the destination when no static position is available.
+  // Depends on `map` so it re-runs once the Maps API is ready (not just on dest change).
   useEffect(() => {
-    if (staticPos) return
+    if (staticPos || !map) return
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const maps = (window as any).google?.maps
     if (!maps) return
@@ -68,7 +70,7 @@ export function ClusterMarker({ dest, items, dimmed, onClick }: ClusterMarkerPro
     }
     run()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dest])
+  }, [dest, map])
 
   const cats: Category[] = Array.from(
     new Set(items.map((i) => i.category).filter((c): c is Category => c != null))
