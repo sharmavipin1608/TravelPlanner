@@ -11,6 +11,7 @@ export default defineConfig({
     environmentMatchGlobs: [
       ['tests/integration/**', 'node'],
     ],
+    setupFiles: ['tests/integration/setup.ts'],
   },
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') },
