@@ -7,8 +7,8 @@ describe('CATEGORY_META', () => {
     expect(Object.keys(CATEGORY_META)).toHaveLength(4)
   })
 
-  it('restaurant has hue 14 and glyph fork', () => {
-    expect(CATEGORY_META.restaurant.hue).toBe(14)
+  it('restaurant has hue 5 (crimson) and glyph fork', () => {
+    expect(CATEGORY_META.restaurant.hue).toBe(5)
     expect(CATEGORY_META.restaurant.glyph).toBe('fork')
   })
 
