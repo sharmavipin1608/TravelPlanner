@@ -257,7 +257,7 @@ Build `trips-modal.tsx` (trip list + inline create form + activate on tap). Buil
 ---
 
 ### [TASK-020] /map page composition
-**Status:** in_progress
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [core]
@@ -268,7 +268,7 @@ Wire `src/app/map/page.tsx`: fetch items+trips on mount; compose Sidebar + MapVi
 ---
 
 ### [TASK-021] Unit tests
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** tester
 **Tags:** [testing]
@@ -279,7 +279,7 @@ Write and run unit tests: place-type-map (5 cases), ai-service (MockProvider hap
 ---
 
 ### [TASK-022] Integration tests
-**Status:** pending
+**Status:** in_progress
 **Priority:** high
 **Agent:** tester
 **Tags:** [testing] [api]
