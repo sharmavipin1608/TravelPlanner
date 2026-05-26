@@ -165,22 +165,17 @@ export function Sidebar({
             <div style={{ fontSize: '13px', fontWeight: 600, lineHeight: 1.3 }}>Add a place</div>
             <div style={{ fontSize: '11px', opacity: 0.6, lineHeight: 1.2 }}>search Google Places</div>
           </div>
-          <button
+          <span
             onClick={(e) => { e.stopPropagation(); onOpenScratchpad() }}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              opacity: 0.7,
-            }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onOpenScratchpad() } }}
             title="AI scratchpad"
             aria-label="Open scratchpad"
+            style={{ cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', opacity: 0.7 }}
           >
             <Icon name="sparkle" size={15} stroke="var(--paper)" />
-          </button>
+          </span>
         </button>
       </div>
 
