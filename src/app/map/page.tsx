@@ -25,7 +25,19 @@ export default function MapPage() {
 
   const { filters, setFilters } = useFilters()
   const [settings, updateSetting] = useSettings()
-  const { activeTripId, activeTrip, isInTrip, toggleItemInTrip, activateTrip } = useTrip(trips)
+  const { activeTripId, activeTrip, isInTrip, toggleItemInTrip, activateTrip, tripItemCount } = useTrip(trips)
+
+  function refreshItems() {
+    fetch('/api/items')
+      .then((r) => r.json())
+      .then((json) => { if (json.data) setItems(json.data) })
+      .catch(() => {})
+  }
+
+  async function handleToggleTrip(item: Item) {
+    const result = await toggleItemInTrip(item)
+    if (result.success) refreshItems()
+  }
 
   useEffect(() => {
     fetch('/api/items')
@@ -59,6 +71,7 @@ export default function MapPage() {
         onOpenSettings={() => setModal('settings')}
         trips={trips}
         activeTripId={activeTripId}
+        tripItemCount={tripItemCount}
         onDeactivateTrip={() => activateTrip(null)}
         scratchpadCount={scratchpadEntries.length}
       />
@@ -81,7 +94,7 @@ export default function MapPage() {
             inActiveTrip={isInTrip(selected)}
             onClose={() => setSelected(null)}
             onAddToTrip={() => setModal('trips')}
-            onToggleTrip={toggleItemInTrip}
+            onToggleTrip={handleToggleTrip}
             onOpenTrips={() => setModal('trips')}
           />
         )}

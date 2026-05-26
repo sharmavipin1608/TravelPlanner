@@ -22,6 +22,7 @@ export interface SidebarProps {
   onOpenSettings: () => void
   trips: Trip[]
   activeTripId: string | null
+  tripItemCount: number
   onDeactivateTrip: () => void
   scratchpadCount: number
 }
@@ -39,6 +40,7 @@ export function Sidebar({
   onOpenSettings,
   trips,
   activeTripId,
+  tripItemCount,
   onDeactivateTrip,
   scratchpadCount,
 }: SidebarProps) {
@@ -223,7 +225,7 @@ export function Sidebar({
         <div style={{ flexShrink: 0 }}>
           <ActiveTripPill
             trip={activeTrip}
-            stopCount={items.filter((item) => item.status === 'planned').length}
+            stopCount={tripItemCount}
             onDeactivate={onDeactivateTrip}
           />
         </div>
