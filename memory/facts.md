@@ -40,10 +40,16 @@
 [llm] All LLM API keys are server-only (no NEXT_PUBLIC_ prefix): ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_AI_API_KEY
 [llm] AIService.categorize() strips markdown fences from LLM output, validates category enum, falls back to { name: rawText, category: null } on parse error
 [maps] place-type-map.ts: mapPlaceType(types[]) returns first matching Category from priority-ordered Sets; returns null if no match
+[maps] @vis.gl/react-google-maps v1.x loads Maps API async — always use importLibrary('places'|'geocoding') before instantiating PlacesService/Geocoder; never rely on synchronous window.google.maps.places.*
+[maps] ClusterMarker geocoding effect depends on [dest, map] (not just [dest]); map comes from useMap() and is null until Maps API ready — the dependency ensures geocoding retries once the map instance exists
+[maps] ClusterMarker innerHTML uses a ref callback (not useRef+useEffect) to set clusterHTML on mount. AdvancedMarker creates its portal contentContainer in a useEffect (async) so the div only mounts on the SECOND render after geocoding — a plain useEffect with geocoded in deps still won't fire because deps didn't change between the two renders. Ref callback fires on actual div mount, bypassing this.
+[maps] useBackfillCoords hook (src/hooks/use-backfill-coords.ts): for items with google_place_id but null lat/lng, calls PlacesService.getDetails then PATCH /api/items; wired in map/page.tsx; items without google_place_id rely on ClusterMarker geocoding instead
+[testing] Playwright webServer must use 'pnpm build && pnpm start' not 'pnpm dev' — Next.js dev overlay (nextjs-portal) intercepts button clicks in headless tests; kill port 3000 before running tests so Playwright starts a fresh build
 [maps] cluster-html.ts: escSVG() helper escapes label before SVG innerHTML injection (XSS fix from security review)
 [ui] useSettings: 'tp-settings' localStorage key; applyDensity() writes --pad-y to documentElement; spread-merge with DEFAULTS on load
-[ui] useTrip: activates trip + resets tripItemIds Set; toggleItemInTrip calls /api/trip-items POST|DELETE optimistically
+[ui] useTrip: activateTrip(id) fetches GET /api/trip-items?trip_id= to hydrate tripItemIds from DB (not just reset to empty Set); toggleItemInTrip calls /api/trip-items POST|DELETE
 [api] GET /api/items supports ?destination= and ?category= query params; GET /api/trips has no params
+[api] GET /api/trip-items?trip_id= returns string[] of item_ids for that trip; PATCH /api/items accepts {id, lat, lng} to backfill coordinates
 [api] POST /api/trip-items verifies trip and item ownership (trips.user_id + items.user_id) before insert — defense-in-depth on top of RLS
 [api] POST /api/categorize calls AIService.categorize(raw_text) and returns CategorizedItem; does NOT write to DB
 [ui] Sidebar: fixed left 380px; DestinationChips + CategoryGrid + ItemList + ActiveTripPill; CategoryGrid toggle is idempotent (re-click resets to 'all')

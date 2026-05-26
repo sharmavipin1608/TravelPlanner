@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { AdvancedMarker, useMap } from '@vis.gl/react-google-maps'
 import type { Item, Category } from '@/types'
 import { clusterHTML } from '@/lib/google-maps/cluster-html'
@@ -27,7 +27,6 @@ function getStaticPosition(dest: string, items: Item[]): LatLng | null {
 }
 
 export function ClusterMarker({ dest, items, dimmed, onClick }: ClusterMarkerProps) {
-  const divRef = useRef<HTMLDivElement>(null)
   const [geocoded, setGeocoded] = useState<LatLng | null>(null)
   const map = useMap()
 
@@ -76,9 +75,13 @@ export function ClusterMarker({ dest, items, dimmed, onClick }: ClusterMarkerPro
     new Set(items.map((i) => i.category).filter((c): c is Category => c != null))
   )
 
-  useEffect(() => {
-    if (divRef.current) {
-      divRef.current.innerHTML = clusterHTML(dest, items.length, cats, dimmed)
+  // Ref callback instead of useRef+useEffect: fires on the div's actual mount, not on a dep
+  // change. AdvancedMarker creates its portal container in a useEffect (async), so the div only
+  // appears on the second render after geocoding completes — by which point the old useEffect
+  // deps were unchanged and would not re-run.
+  const contentRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      node.innerHTML = clusterHTML(dest, items.length, cats, dimmed)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dest, items.length, dimmed, cats.join(',')])
@@ -90,7 +93,7 @@ export function ClusterMarker({ dest, items, dimmed, onClick }: ClusterMarkerPro
       position={position}
       onClick={onClick}
     >
-      <div ref={divRef} />
+      <div ref={contentRef} />
     </AdvancedMarker>
   )
 }
