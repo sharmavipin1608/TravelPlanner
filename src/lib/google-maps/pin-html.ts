@@ -25,19 +25,27 @@ function glyphSVG(glyph: string): string {
   }
 }
 
+function buildFilter(selected: boolean, inTrip: boolean): string {
+  const parts: string[] = []
+  if (selected) parts.push('drop-shadow(0 4px 8px rgba(0,0,0,0.35))')
+  if (inTrip)   parts.push('drop-shadow(0 0 5px oklch(0.55 0.18 280))')
+  return parts.length ? `filter: ${parts.join(' ')};` : ''
+}
+
 export function pinHTML(
   item: Item,
   style: PinStyle,
   selected: boolean,
-  dimmed: boolean
+  dimmed: boolean,
+  inTrip = false,
 ): string {
-  const meta = item.category ? CATEGORY_META[item.category] : { hue: 0, glyph: 'star' as const }
-  const color = `oklch(0.62 0.16 ${meta.hue})`
+  const meta = item.category ? CATEGORY_META[item.category] : { color: 'oklch(0.62 0.16 0)', glyph: 'star' as const }
+  const color = meta.color
   const opacity = dimmed ? 'opacity: 0.25;' : ''
-  const shadow = selected ? 'filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35));' : ''
+  const filterStyle = buildFilter(selected, inTrip)
 
   if (style === 'dot') {
-    return `<div style="${opacity}${shadow}">
+    return `<div style="${opacity}${filterStyle}">
       <svg viewBox="-18 -18 36 36" width="36" height="36" overflow="visible">
         ${selected ? `<circle r="17" fill="${color}" opacity=".18" />` : ''}
         <circle r="11" fill="${color}" stroke="#fff" stroke-width="2.2" />
@@ -47,7 +55,7 @@ export function pinHTML(
   }
 
   if (style === 'ring') {
-    return `<div style="${opacity}${shadow}">
+    return `<div style="${opacity}${filterStyle}">
       <svg viewBox="-18 -18 36 36" width="36" height="36" overflow="visible">
         ${selected ? `<circle r="19" fill="none" stroke="${color}" stroke-width="1" opacity=".6" />` : ''}
         <circle r="12" fill="#fff" stroke="${color}" stroke-width="3" />
@@ -57,7 +65,7 @@ export function pinHTML(
   }
 
   // teardrop (default) — anchor point at bottom (0, 20)
-  return `<div style="${opacity}${shadow}">
+  return `<div style="${opacity}${filterStyle}">
     <svg viewBox="-16 -22 32 46" width="32" height="46" overflow="visible">
       ${selected ? '<ellipse cx="0" cy="20" rx="9" ry="3" fill="rgba(0,0,0,.22)" />' : ''}
       <path d="M0 -16 C -9 -16 -13 -9 -13 -3 C -13 5 -4 12 0 20 C 4 12 13 5 13 -3 C 13 -9 9 -16 0 -16 Z"

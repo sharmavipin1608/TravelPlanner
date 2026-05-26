@@ -1,13 +1,7 @@
 'use client'
 
-import type { Item, Category } from '@/types'
-
-const CATEGORY_HUE: Record<Category, number> = {
-  restaurant: 14,
-  place: 36,
-  accommodation: 216,
-  activity: 152,
-}
+import type { Item } from '@/types'
+import { CATEGORY_META } from '@/lib/google-maps/category-meta'
 
 const STATUS_COLOR: Record<string, string> = {
   wishlist: '#888',
@@ -22,8 +16,8 @@ interface ItemRowProps {
 }
 
 export function ItemRow({ item, selected, onClick }: ItemRowProps) {
-  const hue = item.category ? CATEGORY_HUE[item.category] : 0
-  const categoryColor = `oklch(0.62 0.16 ${hue})`
+  const meta = item.category ? CATEGORY_META[item.category] : null
+  const categoryColor = meta?.color ?? 'oklch(0.62 0.16 0)'
   const statusColor = STATUS_COLOR[item.status] ?? '#888'
 
   return (

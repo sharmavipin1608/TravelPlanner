@@ -19,12 +19,12 @@ const containerStyle: React.CSSProperties = {
 
 const CATEGORIES: Category[] = ['place', 'restaurant', 'accommodation', 'activity']
 
-function dotStyle(hue: number): React.CSSProperties {
+function dotStyle(color: string): React.CSSProperties {
   return {
     width: 10,
     height: 10,
     borderRadius: '50%',
-    backgroundColor: `oklch(0.62 0.16 ${hue})`,
+    backgroundColor: color,
     flexShrink: 0,
   }
 }
@@ -48,7 +48,7 @@ export function CategoryLegend({ show }: CategoryLegendProps) {
         const meta = CATEGORY_META[cat]
         return (
           <div key={cat} style={rowStyle}>
-            <span style={dotStyle(meta.hue)} />
+            <span style={dotStyle(meta.color)} />
             <span>{meta.label}</span>
           </div>
         )

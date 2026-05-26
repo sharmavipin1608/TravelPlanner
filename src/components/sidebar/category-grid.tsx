@@ -1,13 +1,7 @@
 'use client'
 
 import type { Item, Category } from '@/types'
-
-const CATEGORY_META: Record<Category, { hue: number; label: string }> = {
-  restaurant: { hue: 14, label: 'Restaurants' },
-  place: { hue: 36, label: 'Places' },
-  accommodation: { hue: 216, label: 'Stays' },
-  activity: { hue: 152, label: 'Activities' },
-}
+import { CATEGORY_META } from '@/lib/google-maps/category-meta'
 
 const CATEGORY_ORDER: Category[] = ['restaurant', 'place', 'accommodation', 'activity']
 
@@ -41,7 +35,6 @@ export function CategoryGrid({
         const meta = CATEGORY_META[cat]
         const count = filteredItems.filter((item) => item.category === cat).length
         const isActive = activeCategory === cat
-        const color = `oklch(0.62 0.16 ${meta.hue})`
 
         return (
           <button
@@ -55,7 +48,7 @@ export function CategoryGrid({
               borderRadius: '8px',
               background: isActive ? `oklch(0.96 0.03 ${meta.hue})` : 'var(--paper-2)',
               cursor: 'pointer',
-              border: isActive ? `1.5px solid ${color}` : '1.5px solid transparent',
+              border: isActive ? `1.5px solid ${meta.color}` : '1.5px solid transparent',
               textAlign: 'left',
             }}
           >
@@ -64,7 +57,7 @@ export function CategoryGrid({
                 width: '8px',
                 height: '8px',
                 borderRadius: '50%',
-                background: color,
+                background: meta.color,
                 flexShrink: 0,
               }}
             />
@@ -86,7 +79,7 @@ export function CategoryGrid({
                 style={{
                   fontSize: '12px',
                   fontWeight: 600,
-                  color: isActive ? color : 'var(--ink-3)',
+                  color: isActive ? meta.color : 'var(--ink-3)',
                   flexShrink: 0,
                 }}
               >

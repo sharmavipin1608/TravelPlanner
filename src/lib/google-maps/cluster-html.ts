@@ -24,7 +24,7 @@ export function clusterHTML(
   const opacity = dimmed ? 'opacity: 0.25;' : ''
 
   const slices = cats.map((c, i) => {
-    const color = `oklch(0.62 0.16 ${CATEGORY_META[c].hue})`
+    const color = CATEGORY_META[c].color
     const a0 = (i / cats.length) * Math.PI * 2 - Math.PI / 2
     const a1 = ((i + 1) / cats.length) * Math.PI * 2 - Math.PI / 2
     return `<path d="${pieSlicePath(r, a0, a1)}" fill="${color}" />`
