@@ -298,3 +298,159 @@ Write and run integration tests against local Supabase: items API (POST+GET, RLS
 
 Write Playwright E2E specs (add-item, scratchpad 3-state, trip-planning). Configure playwright.config.ts webServer. Deploy to Vercel: connect GitHub repo, set all env vars, smoke test. See plan Task 20.
 
+---
+
+### [TASK-024] Category color — single source of truth
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [ui] [colors]
+**Depends on:** TASK-023
+
+Add a `color` field to `CategoryMeta`, fix restaurant (crimson) and place (amber) hues, update `pin-html.ts` to use `meta.color` with optional `inTrip` param, and refactor `item-row.tsx` and `category-grid.tsx` to import from the shared `CATEGORY_META`.
+Plan ref: Task 1 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
+---
+
+### [TASK-025] Map legend horizontal pill
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [ui] [components]
+**Depends on:** TASK-024
+
+Replace the vertical-stack legend in `category-legend.tsx` with a horizontal frosted-glass pill layout that uses `meta.color` dots from the shared `CATEGORY_META`.
+Plan ref: Task 2 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
+---
+
+### [TASK-026] Trip indigo color tokens
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [ui] [colors]
+**Depends on:** TASK-024
+
+Replace amber color values with indigo `oklch(0.55 0.18 280)` tokens in `active-trip-pill.tsx` and the active-trip row/badge styles in `trips-modal.tsx`.
+Plan ref: Task 3 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
+---
+
+### [TASK-027] Expose `tripItemIds` from `useTrip`
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [state]
+**Depends on:** TASK-023
+
+Add `tripItemIds` (Set<string>) and `isInTrip` callback to the return value of `use-trip.ts` so consumers can query membership without re-implementing the lookup.
+Plan ref: Task 4 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
+---
+
+### [TASK-028] DELETE /api/items/[id]
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [api] [backend]
+**Depends on:** TASK-023
+
+Create `src/app/api/items/[id]/route.ts` with a DELETE handler that authenticates via Supabase, scopes the delete to the authenticated user's row, and returns 404 when the item is not found.
+Plan ref: Task 5 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
+---
+
+### [TASK-029] PATCH /api/trips/[id]
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [api] [backend]
+**Depends on:** TASK-023
+
+Create `src/app/api/trips/[id]/route.ts` with a PATCH handler that accepts `start_date` and `end_date`, validates at least one field is present, and returns the updated Trip row.
+Plan ref: Task 6 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
+---
+
+### [TASK-030] DeleteConfirmModal component
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [ui] [components]
+**Depends on:** TASK-028
+
+Create `src/components/modals/delete-confirm-modal.tsx` — a modal dialog with a trash-icon header, item name, and Cancel / Delete buttons that calls the provided `onConfirm` async callback.
+Plan ref: Task 7 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
+---
+
+### [TASK-031] ItemRow contextual action button
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [ui] [components]
+**Depends on:** TASK-027, TASK-030
+
+Add four new props to `ItemRow` (`activeTripId`, `isInTrip`, `onDelete`, `onToggleTrip`) and render a context-sensitive action button: × (delete) when no trip active, + (add to trip) when trip active and not in trip, × (remove, indigo) when in trip.
+Plan ref: Task 8 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
+---
+
+### [TASK-032] Thread props — ItemList, Sidebar, map/page.tsx + E2E delete test
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [ui] [refactor] [testing]
+**Depends on:** TASK-031
+
+Thread `onDeleteItem`, `activeTripId`, `isInTrip`, and `onToggleTrip` through `item-list.tsx` and `sidebar.tsx`, wire the delete flow in `map/page.tsx` with `DeleteConfirmModal`, and write the Playwright E2E delete test.
+Plan ref: Task 9 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
+---
+
+### [TASK-033] Edit trip dates in TripsModal
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [ui] [components]
+**Depends on:** TASK-029
+
+Add a pencil icon and inline date-editing form to each trip row in `trips-modal.tsx` that PATCHes `/api/trips/[id]` on save, plus an E2E test covering write→reload→restore round-trip.
+Plan ref: Task 10 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
+---
+
+### [TASK-034] Trip dashboard in TripsModal
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [ui] [components]
+**Depends on:** TASK-027, TASK-033
+
+Add `items` and `tripItemIds` props to `TripsModal`, render an SVG donut chart, 2×2 category count grid, and scrollable stops list below the active trip's date row.
+Plan ref: Task 11 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
+---
+
+### [TASK-035] Map pin trip indicator (PinMarker)
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [ui] [components]
+**Depends on:** TASK-024
+
+Add an `inTrip` prop to `pin-marker.tsx` and pass it to `pinHTML` so in-trip pins glow with an indigo drop-shadow and receive a higher `zIndex`.
+Plan ref: Task 12 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
+---
+
+### [TASK-036] Wire pin indicator in MapView + map/page.tsx
+**Status:** pending
+**Priority:** high
+**Agent:** coder
+**Tags:** [ui] [refactor]
+**Depends on:** TASK-035, TASK-027
+
+Add `activeTripId` and `isInTrip` to `MapViewProps`, update the `PinMarker` render loop to pass `inTrip` and apply dimming logic for non-trip items, then pass the props from `map/page.tsx` to complete the full integration.
+Plan ref: Task 13 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
+
