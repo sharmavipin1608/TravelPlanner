@@ -98,12 +98,27 @@ function SearchView({ onSelect }: SearchViewProps) {
     inputRef.current?.focus()
   }, [])
 
-  const fetchPredictions = useCallback((input: string) => {
+  const fetchPredictions = useCallback(async (input: string) => {
     const maps = getGoogleMaps()
-    if (!maps?.places?.AutocompleteService) return
+    if (!maps) return
     setIsLoading(true)
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const service: GMapsAutocompleteService = new (maps.places.AutocompleteService as any)()
+    let AutocompleteServiceCtor: any
+    try {
+      if (typeof maps.importLibrary === 'function') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const lib = await maps.importLibrary('places') as any
+        AutocompleteServiceCtor = lib?.AutocompleteService
+      }
+    } catch { /* fall through */ }
+    if (!AutocompleteServiceCtor) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      AutocompleteServiceCtor = (maps as any)?.places?.AutocompleteService
+    }
+    if (!AutocompleteServiceCtor) { setIsLoading(false); return }
+
+    const service: GMapsAutocompleteService = new AutocompleteServiceCtor()
     service.getPlacePredictions({ input }, (preds, status) => {
       setIsLoading(false)
       if (status === 'OK' && preds) {
@@ -661,13 +676,11 @@ export function AutocompleteAdd({ onClose, onSave, manualMode = false }: Autocom
   const [isFetching, setIsFetching] = useState(false)
   const attributionRef = useRef<HTMLDivElement>(null)
 
-  function handleSelectPrediction(prediction: GMapsAutocompletePrediction) {
+  async function handleSelectPrediction(prediction: GMapsAutocompletePrediction) {
     setSelectedPrediction(prediction)
     setIsFetching(true)
 
-    const maps = getGoogleMaps()
-    if (!maps?.places?.PlacesService) {
-      // Fallback: no detail — use prediction data only
+    const fallback = () => {
       setPlaceDetail({
         placeId: prediction.place_id,
         name: prediction.structured_formatting.main_text,
@@ -677,14 +690,39 @@ export function AutocompleteAdd({ onClose, onSave, manualMode = false }: Autocom
         destination: prediction.structured_formatting.secondary_text || null,
       })
       setIsFetching(false)
+    }
+
+    const maps = getGoogleMaps()
+    if (!maps) { fallback(); return }
+
+    // Use importLibrary (async) to ensure places classes are fully loaded.
+    // Directly accessing window.google.maps.places.PlacesService is unreliable
+    // with the new Maps JS API bootstrap used by @vis.gl/react-google-maps v1.x.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let PlacesServiceCtor: any
+    try {
+      if (typeof maps.importLibrary === 'function') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const lib = await maps.importLibrary('places') as any
+        PlacesServiceCtor = lib?.PlacesService
+      }
+    } catch {
+      // importLibrary unavailable — fall through to legacy access
+    }
+
+    if (!PlacesServiceCtor) {
+      // Legacy synchronous access (Maps API < v3.55)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      PlacesServiceCtor = (maps as any)?.places?.PlacesService
+    }
+
+    if (!PlacesServiceCtor) {
+      console.error('[autocomplete] PlacesService unavailable — no coordinates will be stored')
+      fallback()
       return
     }
 
-    // PlacesService requires an element for attributions
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const service: GMapsPlacesService = new (maps.places.PlacesService as any)(
-      attributionRef.current!
-    )
+    const service: GMapsPlacesService = new PlacesServiceCtor(attributionRef.current!)
     service.getDetails(
       {
         placeId: prediction.place_id,
@@ -697,7 +735,7 @@ export function AutocompleteAdd({ onClose, onSave, manualMode = false }: Autocom
           const lat = result.geometry?.location?.lat() ?? null
           const lng = result.geometry?.location?.lng() ?? null
           if (lat == null || lng == null) {
-            console.warn('[autocomplete] getDetails: geometry missing for', prediction.place_id, result)
+            console.warn('[autocomplete] getDetails OK but geometry missing for', prediction.place_id)
           }
           const destination = extractDestination(result.address_components)
           setPlaceDetail({
@@ -709,16 +747,8 @@ export function AutocompleteAdd({ onClose, onSave, manualMode = false }: Autocom
             destination,
           })
         } else {
-          console.error('[autocomplete] getDetails failed:', status, 'for place_id:', prediction.place_id)
-          // Fallback on error
-          setPlaceDetail({
-            placeId: prediction.place_id,
-            name: prediction.structured_formatting.main_text,
-            lat: null,
-            lng: null,
-            types: [],
-            destination: prediction.structured_formatting.secondary_text || null,
-          })
+          console.error('[autocomplete] getDetails status:', status, 'for place_id:', prediction.place_id)
+          fallback()
         }
       }
     )
