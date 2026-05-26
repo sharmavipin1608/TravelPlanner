@@ -102,6 +102,7 @@ export function Scratchpad({ entries, onClose, onSaved, onDiscarded }: Scratchpa
           />
           <button
             className="btn-primary"
+            data-testid="scratchpad-sort-btn"
             onClick={handleSort}
             disabled={!composeText.trim()}
             style={{ whiteSpace: 'nowrap', flexShrink: 0 }}

@@ -11,6 +11,7 @@ export function Fab({ isOpen, onClick }: FabProps) {
   return (
     <button
       className={`tp-fab${isOpen ? ' is-open' : ''}`}
+      data-testid="fab"
       onClick={onClick}
       aria-label={isOpen ? 'Close menu' : 'Add a place'}
     >

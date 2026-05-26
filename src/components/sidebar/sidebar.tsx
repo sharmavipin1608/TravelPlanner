@@ -145,6 +145,7 @@ export function Sidebar({
       {/* 2. Add a place CTA */}
       <div style={{ padding: '0 14px 10px', flexShrink: 0 }}>
         <button
+          data-testid="add-place-cta"
           onClick={onOpenAdd}
           style={{
             width: '100%',
@@ -264,6 +265,7 @@ export function Sidebar({
             fontFamily: 'var(--font-ui)',
           }}
           aria-label="Open trips"
+          data-testid="trips-btn"
         >
           <Icon name="suitcase" size={15} stroke="var(--ink-2)" />
           <span>Trips</span>
