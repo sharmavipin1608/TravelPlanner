@@ -59,3 +59,7 @@
 [ui] MapView: APIProvider + Map from @vis.gl/react-google-maps; world mode = ClusterMarker per dest; local mode = PinMarker per item; uses AdvancedMarker with div+ref-callback for innerHTML pins (not JSX children)
 [ui] window.__tpMap = { zoomIn, zoomOut } — global handle for ZoomControls; set in useEffect after map loads
 [ui] ItemCard: position absolute top:80px left:396px; entrance animation via requestAnimationFrame; active trip toggles button color green
+[ui] [colors] CATEGORY_META in src/lib/google-maps/category-meta.ts is the single source of truth for category colors — has hue, color (full oklch string), label, glyph fields
+[ui] [colors] Category oklch colors: restaurant=oklch(0.58 0.20 5) crimson, place=oklch(0.65 0.15 45) amber, accommodation=oklch(0.62 0.16 216) blue, activity=oklch(0.62 0.16 152) green
+[ui] [colors] Derived tints (e.g. oklch(0.96 0.03 ${hue}) active-bg in category-grid) must keep using hue directly — do not replace with meta.color
+[ui] pin-html.ts pinHTML() accepts optional inTrip=false param; adds oklch(0.55 0.18 280) indigo drop-shadow filter when true
