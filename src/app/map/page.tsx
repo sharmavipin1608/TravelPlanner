@@ -105,6 +105,10 @@ export default function MapPage() {
           onSave={(item) => {
             setItems((prev) => [...prev, item])
             setModal(null)
+            // Only zoom to destination if the item has real coordinates
+            if (item.destination && item.lat != null && item.lng != null) {
+              setFilters((f) => ({ ...f, destination: item.destination as string }))
+            }
           }}
         />
       )}
