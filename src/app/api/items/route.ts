@@ -47,6 +47,58 @@ export async function GET(request: NextRequest): Promise<Response> {
   }
 }
 
+export async function PATCH(request: NextRequest): Promise<Response> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return Response.json(
+        { data: null, error: { code: 'unauthorized', message: 'Not authenticated' } } satisfies ApiResponse<Item>,
+        { status: 401 }
+      )
+    }
+
+    let body: { id: string; lat?: number; lng?: number }
+    try {
+      body = await request.json()
+    } catch {
+      return Response.json(
+        { data: null, error: { code: 'invalid_json', message: 'Invalid JSON body' } } satisfies ApiResponse<Item>,
+        { status: 400 }
+      )
+    }
+
+    if (!body.id) {
+      return Response.json(
+        { data: null, error: { code: 'validation_error', message: 'id is required' } } satisfies ApiResponse<Item>,
+        { status: 400 }
+      )
+    }
+
+    const { data, error } = await supabase
+      .from('items')
+      .update({ lat: body.lat ?? null, lng: body.lng ?? null })
+      .eq('id', body.id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error || !data) {
+      return Response.json(
+        { data: null, error: { code: 'db_error', message: 'Item not found or update failed' } } satisfies ApiResponse<Item>,
+        { status: 404 }
+      )
+    }
+
+    return Response.json({ data: data as Item, error: null } satisfies ApiResponse<Item>)
+  } catch {
+    return Response.json(
+      { data: null, error: { code: 'internal', message: 'Internal server error' } } satisfies ApiResponse<Item>,
+      { status: 500 }
+    )
+  }
+}
+
 interface PostItemBody {
   name: string
   category?: Category

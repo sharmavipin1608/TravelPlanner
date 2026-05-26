@@ -5,6 +5,7 @@ import type { Item, Trip, ScratchpadEntry } from '@/types'
 import { useFilters } from '@/hooks/use-filters'
 import { useSettings } from '@/hooks/use-settings'
 import { useTrip } from '@/hooks/use-trip'
+import { useBackfillCoords } from '@/hooks/use-backfill-coords'
 import { Sidebar } from '@/components/sidebar/sidebar'
 import { MapView } from '@/components/map/map-view'
 import { ItemCard } from '@/components/map/item-card'
@@ -26,6 +27,10 @@ export default function MapPage() {
   const { filters, setFilters } = useFilters()
   const [settings, updateSetting] = useSettings()
   const { activeTripId, activeTrip, isInTrip, toggleItemInTrip, activateTrip, tripItemCount } = useTrip(trips)
+
+  useBackfillCoords(items, (updated) => {
+    setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))
+  })
 
   function refreshItems() {
     fetch('/api/items')
