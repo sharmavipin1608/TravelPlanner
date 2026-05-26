@@ -166,7 +166,7 @@ export function MapView(props: MapViewProps) {
         gestureHandling="greedy"
         restriction={{
           latLngBounds: { north: 85, south: -85, east: 180, west: -180 },
-          strictBounds: false,
+          strictBounds: true,
         }}
         style={{ width: '100%', height: '100%' }}
       >

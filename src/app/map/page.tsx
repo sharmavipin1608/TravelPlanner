@@ -105,9 +105,6 @@ export default function MapPage() {
           onSave={(item) => {
             setItems((prev) => [...prev, item])
             setModal(null)
-            if (item.destination) {
-              setFilters((f) => ({ ...f, destination: item.destination as string }))
-            }
           }}
         />
       )}
