@@ -33,48 +33,66 @@ export function CategoryGrid({
       style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gap: '8px',
-        padding: '0 16px 12px',
+        gap: '6px',
+        padding: '0 14px 10px',
       }}
     >
       {CATEGORY_ORDER.map((cat) => {
         const meta = CATEGORY_META[cat]
         const count = filteredItems.filter((item) => item.category === cat).length
         const isActive = activeCategory === cat
-        const borderColor = `oklch(0.62 0.16 ${meta.hue})`
+        const color = `oklch(0.62 0.16 ${meta.hue})`
 
         return (
           <button
             key={cat}
             onClick={() => onToggle(cat)}
             style={{
-              padding: '10px 12px',
-              borderRadius: '10px',
-              background: 'var(--paper-2)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '7px',
+              padding: '8px 10px',
+              borderRadius: '8px',
+              background: isActive ? `oklch(0.96 0.03 ${meta.hue})` : 'var(--paper-2)',
               cursor: 'pointer',
-              border: isActive ? `2px solid ${borderColor}` : '2px solid transparent',
+              border: isActive ? `1.5px solid ${color}` : '1.5px solid transparent',
               textAlign: 'left',
             }}
           >
-            <div
+            <span
               style={{
-                fontSize: '20px',
-                fontWeight: 700,
-                color: 'var(--ink)',
-                lineHeight: 1.2,
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: color,
+                flexShrink: 0,
               }}
-            >
-              {count}
-            </div>
-            <div
+            />
+            <span
               style={{
-                fontSize: '11px',
-                color: 'var(--ink-3)',
-                marginTop: '2px',
+                flex: 1,
+                fontSize: '12px',
+                fontWeight: 500,
+                color: 'var(--ink-2)',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}
             >
               {meta.label}
-            </div>
+            </span>
+            {count > 0 && (
+              <span
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: isActive ? color : 'var(--ink-3)',
+                  flexShrink: 0,
+                }}
+              >
+                {count}
+              </span>
+            )}
           </button>
         )
       })}

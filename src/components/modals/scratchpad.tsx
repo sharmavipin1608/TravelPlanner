@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { ModalBase } from '@/components/ui/modal-base'
+import { Icon } from '@/components/ui/icon'
 import { ScratchpadRow } from './scratchpad-row'
 import type { Item, ScratchpadEntry } from '@/types'
 
@@ -14,13 +15,12 @@ interface ScratchpadProps {
 
 export function Scratchpad({ entries, onClose, onSaved, onDiscarded }: ScratchpadProps) {
   const [composeText, setComposeText] = useState('')
-  // Local compose entries that were submitted but have not yet been saved/discarded
   const [composeEntries, setComposeEntries] = useState<ScratchpadEntry[]>([])
+  const [autoRunIds, setAutoRunIds] = useState<Set<string>>(new Set())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   function handleComposeInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setComposeText(e.target.value)
-    // Auto-grow: reset height then set to scrollHeight
     const el = e.target
     el.style.height = 'auto'
     el.style.height = `${el.scrollHeight}px`
@@ -29,7 +29,6 @@ export function Scratchpad({ entries, onClose, onSaved, onDiscarded }: Scratchpa
   function handleSort() {
     const text = composeText.trim()
     if (!text) return
-
     const tempEntry: ScratchpadEntry = {
       id: crypto.randomUUID(),
       user_id: '',
@@ -38,12 +37,10 @@ export function Scratchpad({ entries, onClose, onSaved, onDiscarded }: Scratchpa
       created_item_id: null,
       created_at: new Date().toISOString(),
     }
-
     setComposeEntries((prev) => [tempEntry, ...prev])
+    setAutoRunIds((prev) => new Set([...prev, tempEntry.id]))
     setComposeText('')
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-    }
+    if (textareaRef.current) textareaRef.current.style.height = 'auto'
   }
 
   function handleComposeKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -67,53 +64,58 @@ export function Scratchpad({ entries, onClose, onSaved, onDiscarded }: Scratchpa
 
   return (
     <ModalBase onClose={onClose} maxWidth={580}>
-      <div style={{ padding: '24px 24px 20px' }}>
-        {/* Header */}
-        <div style={{ marginBottom: 16 }}>
+      {/* Green header band */}
+      <div
+        style={{
+          background: 'oklch(0.95 0.04 145)',
+          padding: '20px 24px 18px',
+          borderRadius: '12px 12px 0 0',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <Icon name="sparkle" size={18} stroke="oklch(0.45 0.14 145)" />
           <h2
             className="font-serif"
-            style={{ margin: 0, fontSize: 20, color: 'var(--ink)', fontWeight: 600 }}
+            style={{ margin: 0, fontSize: 20, color: 'var(--ink)', fontWeight: 700 }}
           >
-            Brain dump
+            Scratchpad
           </h2>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--ink-3)' }}>
-            Dump your thoughts, Claude will sort them.
-          </p>
         </div>
+        <p style={{ margin: 0, fontSize: 13, color: 'oklch(0.45 0.08 145)' }}>
+          Dump anything — restaurant tip, IG handle, half-thought trip idea. AI sorts it.
+        </p>
+      </div>
 
-        {/* Compose row */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+      {/* Body */}
+      <div style={{ padding: '20px 24px 20px' }}>
+        {/* Compose row — input + button side by side */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 6 }}>
           <textarea
             ref={textareaRef}
             className="input"
-            rows={3}
-            placeholder="Nobu Tokyo, also check out that ramen place near the station…"
+            rows={1}
+            placeholder="e.g. that natural-wine bar in setagaya — ahiru store, opens at 5"
             value={composeText}
             onChange={handleComposeInput}
             onKeyDown={handleComposeKeyDown}
-            style={{ resize: 'none', overflow: 'hidden' }}
+            style={{ resize: 'none', overflow: 'hidden', flex: 1, minHeight: 42 }}
           />
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button
-              className="btn-primary"
-              onClick={handleSort}
-              disabled={!composeText.trim()}
-            >
-              Sort it
-            </button>
-          </div>
+          <button
+            className="btn-primary"
+            data-testid="scratchpad-sort-btn"
+            onClick={handleSort}
+            disabled={!composeText.trim()}
+            style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+          >
+            <Icon name="sparkle" size={14} stroke="currentColor" />
+            Sort it
+          </button>
         </div>
 
-        {/* Divider */}
-        {allEntries.length > 0 && (
-          <hr
-            style={{
-              border: 'none',
-              borderTop: '1px solid var(--paper-3)',
-              margin: '0 0 14px',
-            }}
-          />
-        )}
+        {/* Hint text */}
+        <p style={{ margin: '0 0 16px', fontSize: 11, color: 'var(--ink-3)', fontFamily: 'var(--font-mono)' }}>
+          ⌘+Enter to categorize · uses Claude
+        </p>
 
         {/* Entry list */}
         {allEntries.map((entry) => (
@@ -122,19 +124,12 @@ export function Scratchpad({ entries, onClose, onSaved, onDiscarded }: Scratchpa
             entry={entry}
             onSaved={handleSaved}
             onDiscarded={handleDiscarded}
+            autoRun={autoRunIds.has(entry.id)}
           />
         ))}
 
         {allEntries.length === 0 && (
-          <p
-            style={{
-              margin: 0,
-              fontSize: 13,
-              color: 'var(--ink-3)',
-              textAlign: 'center',
-              padding: '20px 0',
-            }}
-          >
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--ink-3)', textAlign: 'center', padding: '20px 0' }}>
             No entries yet — add your first thought above.
           </p>
         )}

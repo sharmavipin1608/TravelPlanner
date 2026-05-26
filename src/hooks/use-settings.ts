@@ -6,12 +6,14 @@ export interface Settings {
   pinStyle: 'teardrop' | 'dot' | 'ring'
   density: 'compact' | 'regular' | 'comfy'
   showLegend: boolean
+  mapStyle: 'paper' | 'cool' | 'dusk' | 'satellite'
 }
 
 const DEFAULTS: Settings = {
   pinStyle: 'teardrop',
   density: 'regular',
   showLegend: true,
+  mapStyle: 'paper',
 }
 
 const STORAGE_KEY = 'tp-settings'

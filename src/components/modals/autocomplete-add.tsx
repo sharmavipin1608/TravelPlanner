@@ -78,6 +78,7 @@ function extractDestination(addressComponents: GMapsPlaceResult['address_compone
 interface AutocompleteAddProps {
   onClose: () => void
   onSave: (item: Item) => void
+  manualMode?: boolean
 }
 
 // ─── Step 1: Search view ──────────────────────────────────────────────────────
@@ -97,12 +98,27 @@ function SearchView({ onSelect }: SearchViewProps) {
     inputRef.current?.focus()
   }, [])
 
-  const fetchPredictions = useCallback((input: string) => {
+  const fetchPredictions = useCallback(async (input: string) => {
     const maps = getGoogleMaps()
-    if (!maps?.places?.AutocompleteService) return
+    if (!maps) return
     setIsLoading(true)
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const service: GMapsAutocompleteService = new (maps.places.AutocompleteService as any)()
+    let AutocompleteServiceCtor: any
+    try {
+      if (typeof maps.importLibrary === 'function') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const lib = await maps.importLibrary('places') as any
+        AutocompleteServiceCtor = lib?.AutocompleteService
+      }
+    } catch { /* fall through */ }
+    if (!AutocompleteServiceCtor) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      AutocompleteServiceCtor = (maps as any)?.places?.AutocompleteService
+    }
+    if (!AutocompleteServiceCtor) { setIsLoading(false); return }
+
+    const service: GMapsAutocompleteService = new AutocompleteServiceCtor()
     service.getPlacePredictions({ input }, (preds, status) => {
       setIsLoading(false)
       if (status === 'OK' && preds) {
@@ -132,8 +148,32 @@ function SearchView({ onSelect }: SearchViewProps) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      {/* Salmon header band */}
+      <div
+        style={{
+          background: 'oklch(0.94 0.04 36)',
+          padding: '20px 20px 16px',
+          borderRadius: '12px 12px 0 0',
+        }}
+      >
+        <h2
+          style={{
+            margin: '0 0 4px',
+            fontSize: 22,
+            fontWeight: 700,
+            color: 'var(--ink)',
+            fontFamily: 'var(--font-serif)',
+          }}
+        >
+          Save a place
+        </h2>
+        <p style={{ margin: 0, fontSize: 13, color: 'oklch(0.45 0.08 36)', fontFamily: 'var(--font-ui)' }}>
+          Pulls name, coords, hours and type from Google.
+        </p>
+      </div>
+
       {/* Search input */}
-      <div style={{ padding: '20px 20px 12px' }}>
+      <div style={{ padding: '16px 20px 8px' }}>
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <span
             style={{
@@ -152,12 +192,31 @@ function SearchView({ onSelect }: SearchViewProps) {
             className="input"
             value={query}
             onChange={handleChange}
-            placeholder="Search places…"
+            placeholder="Start typing a place name..."
             style={{ paddingLeft: 34, fontSize: 15 }}
             autoComplete="off"
           />
         </div>
       </div>
+
+      {/* Helper text box — shown when no query */}
+      {!query.trim() && (
+        <div style={{ padding: '0 20px 16px' }}>
+          <div
+            style={{
+              background: 'var(--paper-2)',
+              borderRadius: 10,
+              padding: '12px 14px',
+              fontSize: 13,
+              color: 'var(--ink-3)',
+              fontFamily: 'var(--font-ui)',
+              lineHeight: 1.5,
+            }}
+          >
+            Type to search. We use Google Places — coords + opening hours come along for free.
+          </div>
+        </div>
+      )}
 
       {/* Results */}
       {predictions.length > 0 && (
@@ -235,10 +294,12 @@ interface DetailFormProps {
   onBack: () => void
   onSave: (item: Item) => void
   onClose: () => void
+  manualMode?: boolean
 }
 
-function DetailForm({ detail, onBack, onSave, onClose }: DetailFormProps) {
+function DetailForm({ detail, onBack, onSave, onClose, manualMode = false }: DetailFormProps) {
   const suggestedCategory = mapPlaceType(detail.types)
+  const [name, setName] = useState(detail.name)
   const [category, setCategory] = useState<Category | ''>(suggestedCategory ?? '')
   const [status, setStatus] = useState<Status>('wishlist')
   const [destination, setDestination] = useState(detail.destination ?? '')
@@ -253,7 +314,7 @@ function DetailForm({ detail, onBack, onSave, onClose }: DetailFormProps) {
     setError(null)
     try {
       const body = {
-        name: detail.name,
+        name: name.trim(),
         category: category || undefined,
         google_place_types: detail.types.length > 0 ? detail.types : undefined,
         google_place_id: detail.placeId,
@@ -286,48 +347,120 @@ function DetailForm({ detail, onBack, onSave, onClose }: DetailFormProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
       {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: '16px 20px',
-          borderBottom: '1px solid var(--paper-2)',
-        }}
-      >
-        <button
-          onClick={onBack}
+      {manualMode ? (
+        <div
           style={{
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 4,
+            background: 'oklch(0.94 0.03 252)',
+            padding: '20px 20px 16px',
+            borderRadius: '12px 12px 0 0',
+          }}
+        >
+          <h2
+            style={{
+              margin: '0 0 4px',
+              fontSize: 22,
+              fontWeight: 700,
+              color: 'var(--ink)',
+              fontFamily: 'var(--font-serif)',
+            }}
+          >
+            Add manually
+          </h2>
+          <p style={{ margin: 0, fontSize: 13, color: 'oklch(0.45 0.07 252)', fontFamily: 'var(--font-ui)' }}>
+            Name + category · no location data
+          </p>
+        </div>
+      ) : (
+        <div
+          style={{
             display: 'flex',
             alignItems: 'center',
-            color: 'var(--ink-2)',
-            borderRadius: 6,
-          }}
-          aria-label="Back to search"
-        >
-          <Icon name="arrow-left" size={18} stroke="currentColor" />
-        </button>
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 17,
-            fontWeight: 600,
-            color: 'var(--ink)',
-            fontFamily: 'var(--font-ui)',
-            lineHeight: 1.2,
-            flex: 1,
+            gap: 10,
+            padding: '16px 20px',
+            borderBottom: '1px solid var(--paper-2)',
           }}
         >
-          {detail.name}
-        </h2>
-      </div>
+          <button
+            onClick={onBack}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 4,
+              display: 'flex',
+              alignItems: 'center',
+              color: 'var(--ink-2)',
+              borderRadius: 6,
+            }}
+            aria-label="Back to search"
+          >
+            <Icon name="arrow-left" size={18} stroke="currentColor" />
+          </button>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 17,
+              fontWeight: 600,
+              color: 'var(--ink)',
+              fontFamily: 'var(--font-ui)',
+              lineHeight: 1.2,
+              flex: 1,
+            }}
+          >
+            {detail.name}
+          </h2>
+        </div>
+      )}
 
       {/* Form body */}
       <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Name input — shown in manual mode */}
+        {manualMode && (
+          <div>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 11,
+                fontWeight: 600,
+                color: 'var(--ink-3)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: 6,
+                fontFamily: 'var(--font-ui)',
+              }}
+            >
+              Name
+            </label>
+            <input
+              className="input"
+              placeholder="e.g. Ahiru Store"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+              style={{ width: '100%', boxSizing: 'border-box' }}
+            />
+          </div>
+        )}
+
+        {/* Coordinates indicator */}
+        {!manualMode && (
+          <div
+            style={{
+              fontSize: 12,
+              color: detail.lat != null ? 'oklch(0.45 0.12 145)' : 'oklch(0.55 0.18 20)',
+              background: detail.lat != null ? 'oklch(0.95 0.04 145)' : 'oklch(0.97 0.04 20)',
+              border: `1px solid ${detail.lat != null ? 'oklch(0.85 0.08 145)' : 'oklch(0.88 0.1 20)'}`,
+              borderRadius: 6,
+              padding: '5px 10px',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            {detail.lat != null
+              ? `coords: ${detail.lat.toFixed(4)}, ${detail.lng!.toFixed(4)}`
+              : 'No coordinates — pin will not appear on map'}
+          </div>
+        )}
+
         {/* Google place types pills */}
         {detail.types.length > 0 && (
           <div>
@@ -522,8 +655,8 @@ function DetailForm({ detail, onBack, onSave, onClose }: DetailFormProps) {
         <button
           className="btn-primary"
           onClick={handleSave}
-          disabled={isSaving}
-          style={{ width: '100%', justifyContent: 'center', opacity: isSaving ? 0.6 : 1 }}
+          disabled={isSaving || (manualMode && !name.trim())}
+          style={{ width: '100%', justifyContent: 'center', opacity: (isSaving || (manualMode && !name.trim())) ? 0.6 : 1 }}
         >
           {isSaving ? 'Saving…' : 'Save place'}
         </button>
@@ -534,20 +667,20 @@ function DetailForm({ detail, onBack, onSave, onClose }: DetailFormProps) {
 
 // ─── Main modal ───────────────────────────────────────────────────────────────
 
-export function AutocompleteAdd({ onClose, onSave }: AutocompleteAddProps) {
+export function AutocompleteAdd({ onClose, onSave, manualMode = false }: AutocompleteAddProps) {
   const [selectedPrediction, setSelectedPrediction] =
     useState<GMapsAutocompletePrediction | null>(null)
-  const [placeDetail, setPlaceDetail] = useState<PlaceDetail | null>(null)
+  const [placeDetail, setPlaceDetail] = useState<PlaceDetail | null>(
+    manualMode ? { placeId: '', name: '', lat: null, lng: null, types: [], destination: null } : null
+  )
   const [isFetching, setIsFetching] = useState(false)
   const attributionRef = useRef<HTMLDivElement>(null)
 
-  function handleSelectPrediction(prediction: GMapsAutocompletePrediction) {
+  async function handleSelectPrediction(prediction: GMapsAutocompletePrediction) {
     setSelectedPrediction(prediction)
     setIsFetching(true)
 
-    const maps = getGoogleMaps()
-    if (!maps?.places?.PlacesService) {
-      // Fallback: no detail — use prediction data only
+    const fallback = () => {
       setPlaceDetail({
         placeId: prediction.place_id,
         name: prediction.structured_formatting.main_text,
@@ -557,14 +690,39 @@ export function AutocompleteAdd({ onClose, onSave }: AutocompleteAddProps) {
         destination: prediction.structured_formatting.secondary_text || null,
       })
       setIsFetching(false)
+    }
+
+    const maps = getGoogleMaps()
+    if (!maps) { fallback(); return }
+
+    // Use importLibrary (async) to ensure places classes are fully loaded.
+    // Directly accessing window.google.maps.places.PlacesService is unreliable
+    // with the new Maps JS API bootstrap used by @vis.gl/react-google-maps v1.x.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let PlacesServiceCtor: any
+    try {
+      if (typeof maps.importLibrary === 'function') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const lib = await maps.importLibrary('places') as any
+        PlacesServiceCtor = lib?.PlacesService
+      }
+    } catch {
+      // importLibrary unavailable — fall through to legacy access
+    }
+
+    if (!PlacesServiceCtor) {
+      // Legacy synchronous access (Maps API < v3.55)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      PlacesServiceCtor = (maps as any)?.places?.PlacesService
+    }
+
+    if (!PlacesServiceCtor) {
+      console.error('[autocomplete] PlacesService unavailable — no coordinates will be stored')
+      fallback()
       return
     }
 
-    // PlacesService requires an element for attributions
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const service: GMapsPlacesService = new (maps.places.PlacesService as any)(
-      attributionRef.current!
-    )
+    const service: GMapsPlacesService = new PlacesServiceCtor(attributionRef.current!)
     service.getDetails(
       {
         placeId: prediction.place_id,
@@ -576,6 +734,9 @@ export function AutocompleteAdd({ onClose, onSave }: AutocompleteAddProps) {
           const types = result.types ?? []
           const lat = result.geometry?.location?.lat() ?? null
           const lng = result.geometry?.location?.lng() ?? null
+          if (lat == null || lng == null) {
+            console.warn('[autocomplete] getDetails OK but geometry missing for', prediction.place_id)
+          }
           const destination = extractDestination(result.address_components)
           setPlaceDetail({
             placeId: prediction.place_id,
@@ -586,15 +747,8 @@ export function AutocompleteAdd({ onClose, onSave }: AutocompleteAddProps) {
             destination,
           })
         } else {
-          // Fallback on error
-          setPlaceDetail({
-            placeId: prediction.place_id,
-            name: prediction.structured_formatting.main_text,
-            lat: null,
-            lng: null,
-            types: [],
-            destination: prediction.structured_formatting.secondary_text || null,
-          })
+          console.error('[autocomplete] getDetails status:', status, 'for place_id:', prediction.place_id)
+          fallback()
         }
       }
     )
@@ -628,6 +782,7 @@ export function AutocompleteAdd({ onClose, onSave }: AutocompleteAddProps) {
           onBack={handleBack}
           onSave={onSave}
           onClose={onClose}
+          manualMode={manualMode}
         />
       ) : (
         <SearchView onSelect={handleSelectPrediction} />

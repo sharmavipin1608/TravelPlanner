@@ -29,6 +29,7 @@ export function ItemRow({ item, selected, onClick }: ItemRowProps) {
   return (
     <div
       role="button"
+      data-testid="item-row"
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => {

@@ -9,32 +9,39 @@ export class AIService {
   }
 
   async categorize(rawText: string): Promise<CategorizedItem> {
-    const prompt = `You are a travel assistant. Given this travel note, extract structured information.
+    const prompt = `You are a travel assistant. Extract structured info from this travel note.
 
 Note: "${rawText}"
 
-Return ONLY a JSON object with these exact fields (no markdown, no explanation):
-{
-  "name": "place name",
-  "category": "place" | "restaurant" | "accommodation" | "activity" | null,
-  "destination": "City, Country" | null,
-  "notes": "any additional context" | null
-}
+Return ONLY valid JSON (no markdown, no code fences, no explanation):
+{"name":"place name","category":"restaurant|place|accommodation|activity or null","destination":"City, Country or null","notes":"extra context or null"}
 
-If you cannot determine a field with confidence, use null.`
+Rules:
+- name: the place name only
+- category: one of restaurant, place, accommodation, activity — or null if unclear
+- destination: city + country where the place is located (e.g. "Tokyo, Japan") — or null if unknown. NEVER include the word "null" in the string.
+- notes: brief context, or null`
 
     try {
       const raw = await this.provider.complete(prompt)
-      // Strip markdown code fences if present
       const cleaned = raw.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim()
       const parsed = JSON.parse(cleaned) as CategorizedItem
+
+      const cleanDestination = (d: unknown): string | null => {
+        if (typeof d !== 'string') return null
+        const trimmed = d.trim()
+        // Reject strings that contain the word "null" literally
+        if (/\bnull\b/i.test(trimmed)) return null
+        return trimmed || null
+      }
+
       return {
-        name: typeof parsed.name === 'string' ? parsed.name : rawText,
+        name: typeof parsed.name === 'string' && parsed.name.trim() ? parsed.name.trim() : rawText,
         category: ['place','restaurant','accommodation','activity'].includes(parsed.category as string)
           ? parsed.category
           : null,
-        destination: typeof parsed.destination === 'string' ? parsed.destination : null,
-        notes: typeof parsed.notes === 'string' ? parsed.notes : null,
+        destination: cleanDestination(parsed.destination),
+        notes: typeof parsed.notes === 'string' && parsed.notes.trim() ? parsed.notes.trim() : null,
       }
     } catch {
       return { name: rawText, category: null, destination: null, notes: null }

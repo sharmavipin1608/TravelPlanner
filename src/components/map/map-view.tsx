@@ -156,13 +156,18 @@ function MapInner({
 
 export function MapView(props: MapViewProps) {
   return (
-    <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''}>
+    <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''} libraries={['places']}>
       <Map
         defaultCenter={{ lat: 25, lng: 10 }}
         defaultZoom={2}
+        minZoom={2}
         mapId="tp-map"
         disableDefaultUI
         gestureHandling="greedy"
+        restriction={{
+          latLngBounds: { north: 85, south: -85, east: 180, west: -180 },
+          strictBounds: true,
+        }}
         style={{ width: '100%', height: '100%' }}
       >
         <MapInner {...props} />

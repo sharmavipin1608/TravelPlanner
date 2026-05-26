@@ -5,6 +5,7 @@ import type { Item, Trip, ScratchpadEntry } from '@/types'
 import { useFilters } from '@/hooks/use-filters'
 import { useSettings } from '@/hooks/use-settings'
 import { useTrip } from '@/hooks/use-trip'
+import { useBackfillCoords } from '@/hooks/use-backfill-coords'
 import { Sidebar } from '@/components/sidebar/sidebar'
 import { MapView } from '@/components/map/map-view'
 import { ItemCard } from '@/components/map/item-card'
@@ -20,12 +21,28 @@ export default function MapPage() {
   const [trips, setTrips] = useState<Trip[]>([])
   const [scratchpadEntries, setScratchpadEntries] = useState<ScratchpadEntry[]>([])
   const [selected, setSelected] = useState<Item | null>(null)
-  const [modal, setModal] = useState<'autocomplete' | 'scratchpad' | 'trips' | 'settings' | null>(null)
+  const [modal, setModal] = useState<'autocomplete' | 'manual' | 'scratchpad' | 'trips' | 'settings' | null>(null)
   const [addMenuOpen, setAddMenuOpen] = useState(false)
 
   const { filters, setFilters } = useFilters()
-  const [settings] = useSettings()
-  const { activeTripId, activeTrip, isInTrip, toggleItemInTrip, activateTrip } = useTrip(trips)
+  const [settings, updateSetting] = useSettings()
+  const { activeTripId, activeTrip, isInTrip, toggleItemInTrip, activateTrip, tripItemCount } = useTrip(trips)
+
+  useBackfillCoords(items, (updated) => {
+    setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))
+  })
+
+  function refreshItems() {
+    fetch('/api/items')
+      .then((r) => r.json())
+      .then((json) => { if (json.data) setItems(json.data) })
+      .catch(() => {})
+  }
+
+  async function handleToggleTrip(item: Item) {
+    const result = await toggleItemInTrip(item)
+    if (result.success) refreshItems()
+  }
 
   useEffect(() => {
     fetch('/api/items')
@@ -59,6 +76,7 @@ export default function MapPage() {
         onOpenSettings={() => setModal('settings')}
         trips={trips}
         activeTripId={activeTripId}
+        tripItemCount={tripItemCount}
         onDeactivateTrip={() => activateTrip(null)}
         scratchpadCount={scratchpadEntries.length}
       />
@@ -81,7 +99,7 @@ export default function MapPage() {
             inActiveTrip={isInTrip(selected)}
             onClose={() => setSelected(null)}
             onAddToTrip={() => setModal('trips')}
-            onToggleTrip={toggleItemInTrip}
+            onToggleTrip={handleToggleTrip}
             onOpenTrips={() => setModal('trips')}
           />
         )}
@@ -92,19 +110,29 @@ export default function MapPage() {
           <AddMenu
             onSearchPlace={() => { setModal('autocomplete'); setAddMenuOpen(false) }}
             onScratchpad={() => { setModal('scratchpad'); setAddMenuOpen(false) }}
+            onAddManually={() => { setModal('manual'); setAddMenuOpen(false) }}
             onCloseMenu={() => setAddMenuOpen(false)}
           />
         )}
       </div>
 
-      {modal === 'autocomplete' && (
+      {(modal === 'autocomplete' || modal === 'manual') && (
         <AutocompleteAdd
+          manualMode={modal === 'manual'}
           onClose={() => setModal(null)}
           onSave={(item) => {
             setItems((prev) => [...prev, item])
             setModal(null)
-            if (item.destination) {
-              setFilters((f) => ({ ...f, destination: item.destination as string }))
+            // Only switch to local mode (showing pins) if already viewing this destination,
+            // or if no destination filter is active yet and the item has coordinates.
+            // Never silently replace an existing destination filter — that hides the user's list.
+            if (item.destination && item.lat != null && item.lng != null) {
+              setFilters((f) => {
+                if (f.destination === null || f.destination === item.destination) {
+                  return { ...f, destination: item.destination as string }
+                }
+                return f
+              })
             }
           }}
         />
@@ -117,6 +145,16 @@ export default function MapPage() {
           onSaved={(item, entryId) => {
             setItems((prev) => [...prev, item])
             setScratchpadEntries((prev) => prev.filter((e) => e.id !== entryId))
+            // Only switch to local mode if already viewing this destination.
+            // Scratchpad items have no coordinates so we can't show a pin anyway.
+            if (item.destination) {
+              setFilters((f) => {
+                if (f.destination === item.destination) {
+                  return { ...f, destination: item.destination as string }
+                }
+                return f
+              })
+            }
           }}
           onDiscarded={(entryId) => {
             setScratchpadEntries((prev) => prev.filter((e) => e.id !== entryId))
@@ -135,7 +173,11 @@ export default function MapPage() {
       )}
 
       {modal === 'settings' && (
-        <SettingsModal onClose={() => setModal(null)} />
+        <SettingsModal
+          settings={settings}
+          updateSetting={updateSetting}
+          onClose={() => setModal(null)}
+        />
       )}
     </div>
   )
