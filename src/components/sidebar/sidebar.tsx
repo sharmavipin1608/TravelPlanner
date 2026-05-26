@@ -88,16 +88,32 @@ export function Sidebar({
           flexShrink: 0,
         }}
       >
-        <span
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '20px',
-            fontWeight: 600,
-            color: 'var(--ink)',
-          }}
-        >
-          Wayfare
-        </span>
+        <div>
+          <span
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: '20px',
+              fontWeight: 700,
+              color: 'var(--ink)',
+              display: 'block',
+              lineHeight: 1.2,
+            }}
+          >
+            Wayfare
+          </span>
+          <span
+            style={{
+              fontSize: '10px',
+              fontWeight: 600,
+              letterSpacing: '0.1em',
+              color: 'var(--ink-3)',
+              textTransform: 'uppercase',
+              fontFamily: 'var(--font-ui)',
+            }}
+          >
+            Your Travel Atlas
+          </span>
+        </div>
         <button
           onClick={onOpenSettings}
           style={{
@@ -172,60 +188,71 @@ export function Sidebar({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          padding: '12px 16px',
+          gap: '4px',
+          padding: '10px 12px',
           borderTop: '1px solid var(--paper-3)',
           flexShrink: 0,
         }}
       >
-        <button
-          onClick={onOpenScratchpad}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            color: 'var(--ink-2)',
-            fontSize: '13px',
-            borderRadius: '6px',
-          }}
-          aria-label="Open scratchpad"
-        >
-          <Icon name="sparkle" size={16} stroke="var(--ink-2)" />
-          {scratchpadCount > 0 && (
-            <span
-              style={{
-                background: 'var(--ink)',
-                color: 'var(--paper)',
-                borderRadius: '10px',
-                padding: '1px 6px',
-                fontSize: '11px',
-                fontWeight: 600,
-              }}
-            >
-              {scratchpadCount}
-            </span>
-          )}
-        </button>
         <button
           onClick={onOpenTrips}
           style={{
             background: 'transparent',
             border: 'none',
             cursor: 'pointer',
-            padding: '6px',
+            padding: '6px 8px',
             display: 'flex',
             alignItems: 'center',
+            gap: '5px',
             color: 'var(--ink-2)',
+            fontSize: '13px',
+            fontWeight: 500,
             borderRadius: '6px',
+            fontFamily: 'var(--font-ui)',
           }}
           aria-label="Open trips"
         >
-          <Icon name="suitcase" size={16} stroke="var(--ink-2)" />
+          <Icon name="suitcase" size={15} stroke="var(--ink-2)" />
+          <span>Trips</span>
+          {trips.length > 0 && (
+            <span
+              style={{
+                background: 'var(--paper-3)',
+                color: 'var(--ink-2)',
+                borderRadius: '10px',
+                padding: '1px 6px',
+                fontSize: '11px',
+                fontWeight: 600,
+              }}
+            >
+              {trips.length}
+            </span>
+          )}
         </button>
+
+        {scratchpadCount > 0 && (
+          <button
+            onClick={onOpenScratchpad}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '6px 8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              color: 'var(--ink-2)',
+              fontSize: '13px',
+              fontWeight: 500,
+              borderRadius: '6px',
+              fontFamily: 'var(--font-ui)',
+            }}
+            aria-label="Open scratchpad"
+          >
+            <Icon name="sparkle" size={15} stroke="var(--ink-2)" />
+            <span>{scratchpadCount} to triage</span>
+          </button>
+        )}
       </div>
     </div>
   )

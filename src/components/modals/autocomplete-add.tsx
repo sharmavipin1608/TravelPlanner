@@ -78,6 +78,7 @@ function extractDestination(addressComponents: GMapsPlaceResult['address_compone
 interface AutocompleteAddProps {
   onClose: () => void
   onSave: (item: Item) => void
+  manualMode?: boolean
 }
 
 // ─── Step 1: Search view ──────────────────────────────────────────────────────
@@ -132,8 +133,32 @@ function SearchView({ onSelect }: SearchViewProps) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      {/* Salmon header band */}
+      <div
+        style={{
+          background: 'oklch(0.94 0.04 36)',
+          padding: '20px 20px 16px',
+          borderRadius: '12px 12px 0 0',
+        }}
+      >
+        <h2
+          style={{
+            margin: '0 0 4px',
+            fontSize: 22,
+            fontWeight: 700,
+            color: 'var(--ink)',
+            fontFamily: 'var(--font-serif)',
+          }}
+        >
+          Save a place
+        </h2>
+        <p style={{ margin: 0, fontSize: 13, color: 'oklch(0.45 0.08 36)', fontFamily: 'var(--font-ui)' }}>
+          Pulls name, coords, hours and type from Google.
+        </p>
+      </div>
+
       {/* Search input */}
-      <div style={{ padding: '20px 20px 12px' }}>
+      <div style={{ padding: '16px 20px 8px' }}>
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <span
             style={{
@@ -152,12 +177,31 @@ function SearchView({ onSelect }: SearchViewProps) {
             className="input"
             value={query}
             onChange={handleChange}
-            placeholder="Search places…"
+            placeholder="Start typing a place name..."
             style={{ paddingLeft: 34, fontSize: 15 }}
             autoComplete="off"
           />
         </div>
       </div>
+
+      {/* Helper text box — shown when no query */}
+      {!query.trim() && (
+        <div style={{ padding: '0 20px 16px' }}>
+          <div
+            style={{
+              background: 'var(--paper-2)',
+              borderRadius: 10,
+              padding: '12px 14px',
+              fontSize: 13,
+              color: 'var(--ink-3)',
+              fontFamily: 'var(--font-ui)',
+              lineHeight: 1.5,
+            }}
+          >
+            Type to search. We use Google Places — coords + opening hours come along for free.
+          </div>
+        </div>
+      )}
 
       {/* Results */}
       {predictions.length > 0 && (
@@ -534,10 +578,12 @@ function DetailForm({ detail, onBack, onSave, onClose }: DetailFormProps) {
 
 // ─── Main modal ───────────────────────────────────────────────────────────────
 
-export function AutocompleteAdd({ onClose, onSave }: AutocompleteAddProps) {
+export function AutocompleteAdd({ onClose, onSave, manualMode = false }: AutocompleteAddProps) {
   const [selectedPrediction, setSelectedPrediction] =
     useState<GMapsAutocompletePrediction | null>(null)
-  const [placeDetail, setPlaceDetail] = useState<PlaceDetail | null>(null)
+  const [placeDetail, setPlaceDetail] = useState<PlaceDetail | null>(
+    manualMode ? { placeId: '', name: '', lat: null, lng: null, types: [], destination: null } : null
+  )
   const [isFetching, setIsFetching] = useState(false)
   const attributionRef = useRef<HTMLDivElement>(null)
 

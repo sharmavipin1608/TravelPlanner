@@ -160,9 +160,14 @@ export function MapView(props: MapViewProps) {
       <Map
         defaultCenter={{ lat: 25, lng: 10 }}
         defaultZoom={2}
+        minZoom={2}
         mapId="tp-map"
         disableDefaultUI
         gestureHandling="greedy"
+        restriction={{
+          latLngBounds: { north: 85, south: -85, east: 180, west: -180 },
+          strictBounds: false,
+        }}
         style={{ width: '100%', height: '100%' }}
       >
         <MapInner {...props} />

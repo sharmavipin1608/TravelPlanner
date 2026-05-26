@@ -20,11 +20,11 @@ export default function MapPage() {
   const [trips, setTrips] = useState<Trip[]>([])
   const [scratchpadEntries, setScratchpadEntries] = useState<ScratchpadEntry[]>([])
   const [selected, setSelected] = useState<Item | null>(null)
-  const [modal, setModal] = useState<'autocomplete' | 'scratchpad' | 'trips' | 'settings' | null>(null)
+  const [modal, setModal] = useState<'autocomplete' | 'manual' | 'scratchpad' | 'trips' | 'settings' | null>(null)
   const [addMenuOpen, setAddMenuOpen] = useState(false)
 
   const { filters, setFilters } = useFilters()
-  const [settings] = useSettings()
+  const [settings, updateSetting] = useSettings()
   const { activeTripId, activeTrip, isInTrip, toggleItemInTrip, activateTrip } = useTrip(trips)
 
   useEffect(() => {
@@ -92,13 +92,15 @@ export default function MapPage() {
           <AddMenu
             onSearchPlace={() => { setModal('autocomplete'); setAddMenuOpen(false) }}
             onScratchpad={() => { setModal('scratchpad'); setAddMenuOpen(false) }}
+            onAddManually={() => { setModal('manual'); setAddMenuOpen(false) }}
             onCloseMenu={() => setAddMenuOpen(false)}
           />
         )}
       </div>
 
-      {modal === 'autocomplete' && (
+      {(modal === 'autocomplete' || modal === 'manual') && (
         <AutocompleteAdd
+          manualMode={modal === 'manual'}
           onClose={() => setModal(null)}
           onSave={(item) => {
             setItems((prev) => [...prev, item])
@@ -135,7 +137,11 @@ export default function MapPage() {
       )}
 
       {modal === 'settings' && (
-        <SettingsModal onClose={() => setModal(null)} />
+        <SettingsModal
+          settings={settings}
+          updateSetting={updateSetting}
+          onClose={() => setModal(null)}
+        />
       )}
     </div>
   )
