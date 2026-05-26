@@ -279,10 +279,12 @@ interface DetailFormProps {
   onBack: () => void
   onSave: (item: Item) => void
   onClose: () => void
+  manualMode?: boolean
 }
 
-function DetailForm({ detail, onBack, onSave, onClose }: DetailFormProps) {
+function DetailForm({ detail, onBack, onSave, onClose, manualMode = false }: DetailFormProps) {
   const suggestedCategory = mapPlaceType(detail.types)
+  const [name, setName] = useState(detail.name)
   const [category, setCategory] = useState<Category | ''>(suggestedCategory ?? '')
   const [status, setStatus] = useState<Status>('wishlist')
   const [destination, setDestination] = useState(detail.destination ?? '')
@@ -297,7 +299,7 @@ function DetailForm({ detail, onBack, onSave, onClose }: DetailFormProps) {
     setError(null)
     try {
       const body = {
-        name: detail.name,
+        name: name.trim(),
         category: category || undefined,
         google_place_types: detail.types.length > 0 ? detail.types : undefined,
         google_place_id: detail.placeId,
@@ -330,48 +332,101 @@ function DetailForm({ detail, onBack, onSave, onClose }: DetailFormProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
       {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: '16px 20px',
-          borderBottom: '1px solid var(--paper-2)',
-        }}
-      >
-        <button
-          onClick={onBack}
+      {manualMode ? (
+        <div
           style={{
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 4,
+            background: 'oklch(0.94 0.03 252)',
+            padding: '20px 20px 16px',
+            borderRadius: '12px 12px 0 0',
+          }}
+        >
+          <h2
+            style={{
+              margin: '0 0 4px',
+              fontSize: 22,
+              fontWeight: 700,
+              color: 'var(--ink)',
+              fontFamily: 'var(--font-serif)',
+            }}
+          >
+            Add manually
+          </h2>
+          <p style={{ margin: 0, fontSize: 13, color: 'oklch(0.45 0.07 252)', fontFamily: 'var(--font-ui)' }}>
+            Name + category · no location data
+          </p>
+        </div>
+      ) : (
+        <div
+          style={{
             display: 'flex',
             alignItems: 'center',
-            color: 'var(--ink-2)',
-            borderRadius: 6,
-          }}
-          aria-label="Back to search"
-        >
-          <Icon name="arrow-left" size={18} stroke="currentColor" />
-        </button>
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 17,
-            fontWeight: 600,
-            color: 'var(--ink)',
-            fontFamily: 'var(--font-ui)',
-            lineHeight: 1.2,
-            flex: 1,
+            gap: 10,
+            padding: '16px 20px',
+            borderBottom: '1px solid var(--paper-2)',
           }}
         >
-          {detail.name}
-        </h2>
-      </div>
+          <button
+            onClick={onBack}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 4,
+              display: 'flex',
+              alignItems: 'center',
+              color: 'var(--ink-2)',
+              borderRadius: 6,
+            }}
+            aria-label="Back to search"
+          >
+            <Icon name="arrow-left" size={18} stroke="currentColor" />
+          </button>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 17,
+              fontWeight: 600,
+              color: 'var(--ink)',
+              fontFamily: 'var(--font-ui)',
+              lineHeight: 1.2,
+              flex: 1,
+            }}
+          >
+            {detail.name}
+          </h2>
+        </div>
+      )}
 
       {/* Form body */}
       <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Name input — shown in manual mode */}
+        {manualMode && (
+          <div>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 11,
+                fontWeight: 600,
+                color: 'var(--ink-3)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: 6,
+                fontFamily: 'var(--font-ui)',
+              }}
+            >
+              Name
+            </label>
+            <input
+              className="input"
+              placeholder="e.g. Ahiru Store"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+              style={{ width: '100%', boxSizing: 'border-box' }}
+            />
+          </div>
+        )}
+
         {/* Google place types pills */}
         {detail.types.length > 0 && (
           <div>
@@ -566,8 +621,8 @@ function DetailForm({ detail, onBack, onSave, onClose }: DetailFormProps) {
         <button
           className="btn-primary"
           onClick={handleSave}
-          disabled={isSaving}
-          style={{ width: '100%', justifyContent: 'center', opacity: isSaving ? 0.6 : 1 }}
+          disabled={isSaving || (manualMode && !name.trim())}
+          style={{ width: '100%', justifyContent: 'center', opacity: (isSaving || (manualMode && !name.trim())) ? 0.6 : 1 }}
         >
           {isSaving ? 'Saving…' : 'Save place'}
         </button>
@@ -674,6 +729,7 @@ export function AutocompleteAdd({ onClose, onSave, manualMode = false }: Autocom
           onBack={handleBack}
           onSave={onSave}
           onClose={onClose}
+          manualMode={manualMode}
         />
       ) : (
         <SearchView onSelect={handleSelectPrediction} />
