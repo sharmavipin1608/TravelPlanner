@@ -313,7 +313,7 @@ Plan ref: Task 1 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-025] Map legend horizontal pill
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [components]
