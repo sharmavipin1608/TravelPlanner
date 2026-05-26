@@ -301,7 +301,7 @@ Write Playwright E2E specs (add-item, scratchpad 3-state, trip-planning). Config
 ---
 
 ### [TASK-024] Category color — single source of truth
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [colors]
