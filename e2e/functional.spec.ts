@@ -177,10 +177,19 @@ test('add to trip: item status updates and stays in trip after refresh', async (
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(1500)
 
-    // Trip should still exist in DB — open trips modal and verify it's listed
+    // Trip should still exist in DB — open modal and activate it
     await page.getByTestId('trips-btn').click()
     await page.waitForTimeout(500)
     await expect(page.getByText(tripName)).toBeVisible({ timeout: 5000 })
+
+    // Re-activate the trip — item count must load from DB (not stay at 0)
+    await page.locator('button').filter({ hasText: tripName }).first().click()
+    await page.waitForTimeout(1000)
+
+    // tripItemCount > 0 means activateTrip() correctly fetched items from DB
+    const tripsBtnText = await page.getByTestId('trips-btn').textContent()
+    const count = parseInt(tripsBtnText?.replace(/\D/g, '') ?? '0', 10)
+    expect(count).toBeGreaterThan(0)
   }
 })
 
