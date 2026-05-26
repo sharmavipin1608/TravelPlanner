@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Icon } from '@/components/ui/icon'
 import type { Item, ScratchpadEntry, Category } from '@/types'
 import type { CategorizedItem } from '@/lib/ai/types'
 
@@ -44,16 +45,16 @@ export function ScratchpadRow({ entry, onSaved, onDiscarded, autoRun = false }: 
         body: JSON.stringify({ raw_text: entry.raw_text, entry_id: entry.id }),
       })
       const json = (await res.json()) as { data: CategorizedItem | null; error: unknown }
-      if (json.data) {
-        setFields({
-          name: json.data.name ?? '',
-          category: (json.data.category as Category | '') ?? '',
-          destination: json.data.destination ?? '',
-          notes: json.data.notes ?? '',
-        })
-      }
+      // Always populate fields — fall back to raw text for name if AI failed
+      const d = json.data
+      setFields({
+        name: d?.name ?? entry.raw_text,
+        category: (d?.category as Category | '') ?? '',
+        destination: d?.destination ?? '',
+        notes: d?.notes ?? '',
+      })
     } catch {
-      // On error fall through to review with empty fields
+      setFields((f) => ({ ...f, name: f.name || entry.raw_text }))
     }
     setState('review')
   }
@@ -81,138 +82,248 @@ export function ScratchpadRow({ entry, onSaved, onDiscarded, autoRun = false }: 
     }
   }
 
+  const cardBg = state === 'pending'
+    ? 'var(--paper-2)'
+    : state === 'thinking'
+    ? 'oklch(0.97 0.02 152)'
+    : '#fff'
+
+  const cardBorder = state === 'thinking'
+    ? '0.5px solid oklch(0.78 0.10 152)'
+    : '0.5px solid var(--line, rgba(60,50,30,.10))'
+
   return (
     <div
       style={{
-        border: '1px solid var(--paper-3)',
-        borderRadius: 12,
-        padding: 14,
+        background: cardBg,
+        border: cardBorder,
+        borderRadius: 10,
+        padding: '12px 14px',
         marginBottom: 10,
+        transition: 'border-color .15s, background .15s',
       }}
     >
-      {/* Raw text always visible */}
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-        <span style={{ fontSize: 13, fontStyle: 'italic', color: 'var(--ink-2)', flex: 1 }}>
+      {/* Quote + timestamp */}
+      <div style={{ marginBottom: 10 }}>
+        <div
+          style={{
+            fontFamily: 'var(--font-serif)',
+            fontSize: 14.5,
+            fontStyle: 'italic',
+            color: 'var(--ink)',
+            lineHeight: 1.4,
+          }}
+        >
           &ldquo;{entry.raw_text}&rdquo;
-        </span>
-        <span style={{ fontSize: 11, color: 'var(--ink-3)', marginLeft: 10, flexShrink: 0 }}>
+        </div>
+        <div
+          style={{
+            fontSize: 10,
+            color: 'var(--ink-3)',
+            marginTop: 4,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            fontFamily: 'var(--font-mono)',
+          }}
+        >
           just now
-        </span>
+        </div>
       </div>
 
+      {/* Pending state */}
       {state === 'pending' && (
-        <div>
-          <button className="btn-primary" onClick={runCategorize}>
-            Sort it
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button
+            onClick={runCategorize}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '7px 14px',
+              background: 'oklch(0.45 0.13 152)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 20,
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: 'pointer',
+            }}
+          >
+            <Icon name="sparkle" size={13} stroke="#fff" />
+            Categorize
+          </button>
+          <button
+            onClick={() => onDiscarded(entry.id)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--ink-3)',
+              cursor: 'pointer',
+              fontSize: 13,
+              padding: '4px 0',
+            }}
+          >
+            discard
           </button>
         </div>
       )}
 
+      {/* Thinking state */}
       {state === 'thinking' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span className="thinking-dot" />
-          <span className="thinking-dot" />
-          <span className="thinking-dot" />
-          <span style={{ color: 'var(--ink-3)', fontSize: 13, marginLeft: 4 }}>
-            Sorting…
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'inline-flex', gap: 4 }}>
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  background: 'oklch(0.55 0.12 152)',
+                  animation: `tp-pulse 1.05s ${i * 0.18}s infinite ease-in-out`,
+                  display: 'block',
+                }}
+              />
+            ))}
+          </div>
+          <span style={{ color: 'var(--ink-3)', fontSize: 13 }}>Sorting…</span>
         </div>
       )}
 
+      {/* Review state */}
       {state === 'review' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <>
           <div
             style={{
+              borderTop: '0.5px solid rgba(60,50,30,.10)',
+              paddingTop: 12,
+              marginTop: 2,
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
-              gap: 10,
+              gap: '10px 14px',
+              marginBottom: 12,
             }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <label style={{ fontSize: 12, color: 'var(--ink-3)' }}>Name</label>
+            <FieldCell label="Name">
               <input
-                className="input"
                 value={fields.name}
                 onChange={(e) => setFields((f) => ({ ...f, name: e.target.value }))}
+                style={inlineInputStyle}
               />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <label style={{ fontSize: 12, color: 'var(--ink-3)' }}>Category</label>
+            </FieldCell>
+            <FieldCell label="Category">
               <select
-                className="input"
                 value={fields.category}
-                onChange={(e) =>
-                  setFields((f) => ({ ...f, category: e.target.value as Category | '' }))
-                }
+                onChange={(e) => setFields((f) => ({ ...f, category: e.target.value as Category | '' }))}
+                style={{ ...inlineInputStyle, appearance: 'none', cursor: 'pointer' }}
               >
                 <option value="">—</option>
-                <option value="place">Place</option>
-                <option value="restaurant">Restaurant</option>
-                <option value="accommodation">Accommodation</option>
-                <option value="activity">Activity</option>
+                <option value="restaurant">Restaurants</option>
+                <option value="place">Places</option>
+                <option value="accommodation">Stays</option>
+                <option value="activity">Activities</option>
               </select>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <label style={{ fontSize: 12, color: 'var(--ink-3)' }}>Destination</label>
+            </FieldCell>
+            <FieldCell label="Destination">
               <input
-                className="input"
                 value={fields.destination}
-                onChange={(e) =>
-                  setFields((f) => ({ ...f, destination: e.target.value }))
-                }
+                onChange={(e) => setFields((f) => ({ ...f, destination: e.target.value }))}
+                style={inlineInputStyle}
               />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <label style={{ fontSize: 12, color: 'var(--ink-3)' }}>Notes</label>
-              <textarea
-                className="input"
-                rows={2}
+            </FieldCell>
+            <FieldCell label="Area / Notes">
+              <input
                 value={fields.notes}
                 onChange={(e) => setFields((f) => ({ ...f, notes: e.target.value }))}
-                style={{ resize: 'vertical' }}
+                style={inlineInputStyle}
               />
-            </div>
+            </FieldCell>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--ink-3)',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  padding: '4px 0',
-                }}
-                onClick={() => onDiscarded(entry.id)}
-              >
-                Discard
-              </button>
-              <button
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--ink-3)',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  padding: '4px 0',
-                }}
-                onClick={runCategorize}
-              >
-                Re-run
-              </button>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button
-              className="btn-primary"
+              onClick={() => onDiscarded(entry.id)}
+              style={{ background: 'none', border: 'none', color: 'var(--ink-3)', cursor: 'pointer', fontSize: 13, padding: '4px 0' }}
+            >
+              discard
+            </button>
+            <button
+              onClick={runCategorize}
+              style={{
+                background: 'none',
+                border: '1px solid var(--paper-3)',
+                color: 'var(--ink-2)',
+                cursor: 'pointer',
+                fontSize: 13,
+                padding: '5px 12px',
+                borderRadius: 20,
+              }}
+            >
+              re-run
+            </button>
+            <button
               onClick={handleSave}
               disabled={saving || !fields.name.trim()}
+              style={{
+                marginLeft: 'auto',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '7px 16px',
+                background: saving || !fields.name.trim() ? 'var(--ink-3)' : 'var(--ink)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 20,
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: saving || !fields.name.trim() ? 'not-allowed' : 'pointer',
+              }}
             >
-              {saving ? 'Saving…' : 'Save place'}
+              {saving ? (
+                'Saving…'
+              ) : (
+                <>
+                  <Icon name="check" size={13} stroke="#fff" strokeWidth={2.5} />
+                  Save place
+                </>
+              )}
             </button>
           </div>
-        </div>
+        </>
       )}
     </div>
   )
+}
+
+function FieldCell({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 600,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          color: 'var(--ink-3)',
+          marginBottom: 3,
+          fontFamily: 'var(--font-mono)',
+        }}
+      >
+        {label}
+      </div>
+      {children}
+    </div>
+  )
+}
+
+const inlineInputStyle: React.CSSProperties = {
+  width: '100%',
+  border: 'none',
+  borderBottom: '0.5px solid rgba(60,50,30,.18)',
+  background: 'transparent',
+  padding: '3px 0',
+  fontSize: 13,
+  color: 'var(--ink)',
+  outline: 'none',
+  fontFamily: 'inherit',
 }

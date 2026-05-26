@@ -133,6 +133,10 @@ export default function MapPage() {
           onSaved={(item, entryId) => {
             setItems((prev) => [...prev, item])
             setScratchpadEntries((prev) => prev.filter((e) => e.id !== entryId))
+            // Zoom to destination (cluster marker) so user sees their saved place
+            if (item.destination) {
+              setFilters((f) => ({ ...f, destination: item.destination as string }))
+            }
           }}
           onDiscarded={(entryId) => {
             setScratchpadEntries((prev) => prev.filter((e) => e.id !== entryId))
