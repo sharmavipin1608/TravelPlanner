@@ -84,35 +84,44 @@ export function Sidebar({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '16px',
+          padding: '16px 16px 14px',
           flexShrink: 0,
         }}
       >
-        <div>
-          <span
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '20px',
-              fontWeight: 700,
-              color: 'var(--ink)',
-              display: 'block',
-              lineHeight: 1.2,
-            }}
-          >
-            Wayfare
-          </span>
-          <span
-            style={{
-              fontSize: '10px',
-              fontWeight: 600,
-              letterSpacing: '0.1em',
-              color: 'var(--ink-3)',
-              textTransform: 'uppercase',
-              fontFamily: 'var(--font-ui)',
-            }}
-          >
-            Your Travel Atlas
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Brand mark */}
+          <svg viewBox="0 0 24 24" width="26" height="26" style={{ flexShrink: 0 }}>
+            <path
+              d="M12 2 C 5 2 3 7 4 12 C 5 18 11 23 12 23 C 13 23 19 18 20 12 C 21 7 19 2 12 2 Z"
+              fill="oklch(0.6 0.14 36)"
+            />
+            <circle cx="12" cy="10.5" r="3.4" fill="#fefcf6" />
+            <circle cx="12" cy="10.5" r="1.4" fill="oklch(0.4 0.08 36)" />
+          </svg>
+          <div>
+            <div
+              style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: '20px',
+                fontWeight: 700,
+                color: 'var(--ink)',
+                lineHeight: 1.15,
+              }}
+            >
+              Wayfare
+            </div>
+            <div
+              style={{
+                fontSize: '10px',
+                fontWeight: 600,
+                letterSpacing: '0.1em',
+                color: 'var(--ink-3)',
+                textTransform: 'uppercase',
+              }}
+            >
+              your travel atlas
+            </div>
+          </div>
         </div>
         <button
           onClick={onOpenSettings}
@@ -131,19 +140,66 @@ export function Sidebar({
         </button>
       </div>
 
-      {/* 2. Search input */}
-      <div style={{ padding: '0 16px 12px', flexShrink: 0 }}>
-        <input
-          className="input"
-          type="text"
-          placeholder="Search…"
-          value={filters.q}
-          onChange={handleSearchChange}
-          style={{ width: '100%', boxSizing: 'border-box' }}
-        />
+      {/* 2. Add a place CTA */}
+      <div style={{ padding: '0 14px 10px', flexShrink: 0 }}>
+        <button
+          onClick={onOpenAdd}
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '10px 12px',
+            background: 'var(--ink)',
+            color: 'var(--paper)',
+            border: 'none',
+            borderRadius: '10px',
+            cursor: 'pointer',
+            textAlign: 'left',
+          }}
+        >
+          <Icon name="search" size={15} stroke="var(--paper)" strokeWidth={2} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '13px', fontWeight: 600, lineHeight: 1.3 }}>Add a place</div>
+            <div style={{ fontSize: '11px', opacity: 0.6, lineHeight: 1.2 }}>search Google Places</div>
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); onOpenScratchpad() }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              opacity: 0.7,
+            }}
+            title="AI scratchpad"
+            aria-label="Open scratchpad"
+          >
+            <Icon name="sparkle" size={15} stroke="var(--paper)" />
+          </button>
+        </button>
       </div>
 
-      {/* 3. Destination chips */}
+      {/* 3. Search input */}
+      <div style={{ padding: '0 14px 10px', flexShrink: 0 }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <span style={{ position: 'absolute', left: '10px', pointerEvents: 'none', display: 'flex' }}>
+            <Icon name="search" size={14} stroke="var(--ink-3)" />
+          </span>
+          <input
+            className="input"
+            type="text"
+            placeholder={filters.destination ? `Search in ${filters.destination.split(',')[0]}` : 'Search saved places'}
+            value={filters.q}
+            onChange={handleSearchChange}
+            style={{ width: '100%', boxSizing: 'border-box', paddingLeft: '30px' }}
+          />
+        </div>
+      </div>
+
+      {/* 4. Destination chips */}
       <div style={{ flexShrink: 0 }}>
         <DestinationChips
           destinations={destinations}
@@ -152,7 +208,7 @@ export function Sidebar({
         />
       </div>
 
-      {/* 4. Category grid */}
+      {/* 5. Category grid */}
       <div style={{ flexShrink: 0 }}>
         <CategoryGrid
           items={items}
@@ -162,7 +218,7 @@ export function Sidebar({
         />
       </div>
 
-      {/* 5. Active trip pill */}
+      {/* 6. Active trip pill */}
       {activeTrip && (
         <div style={{ flexShrink: 0 }}>
           <ActiveTripPill
@@ -173,7 +229,7 @@ export function Sidebar({
         </div>
       )}
 
-      {/* 6. Item list */}
+      {/* 7. Item list */}
       <ItemList
         items={items}
         filters={filters}
@@ -183,7 +239,7 @@ export function Sidebar({
         onStatusChange={handleStatusChange}
       />
 
-      {/* 7. Footer */}
+      {/* 8. Footer */}
       <div
         style={{
           display: 'flex',
