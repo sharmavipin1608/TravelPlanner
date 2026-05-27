@@ -37,6 +37,8 @@ function makeProps(overrides?: Partial<typeof baseTrip>) {
     onActivate: vi.fn(),
     onClose: vi.fn(),
     onTripsUpdated: vi.fn(),
+    items: [],
+    tripItemIds: new Set<string>(),
   }
 }
 
