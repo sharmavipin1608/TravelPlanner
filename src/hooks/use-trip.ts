@@ -64,6 +64,7 @@ export function useTrip(trips: Trip[]) {
     activeTripId,
     activeTrip,
     isInTrip,
+    tripItemIds,
     toggleItemInTrip,
     activateTrip,
     tripItemCount: tripItemIds.size,

@@ -11,6 +11,10 @@ interface ItemListProps {
   onSelect: (item: Item) => void
   onOpenScratchpad: () => void
   onStatusChange?: (status: Status | 'all') => void
+  activeTripId: string | null
+  isInTrip: (item: Item) => boolean
+  onDeleteItem: (item: Item) => void
+  onToggleTrip: (item: Item) => void
 }
 
 const STATUS_OPTIONS: Array<{ value: Status | 'all'; label: string }> = [
@@ -42,6 +46,10 @@ export function ItemList({
   onSelect,
   onOpenScratchpad,
   onStatusChange,
+  activeTripId,
+  isInTrip,
+  onDeleteItem,
+  onToggleTrip,
 }: ItemListProps) {
   const filtered = applyFilters(items, filters)
 
@@ -122,6 +130,10 @@ export function ItemList({
               item={item}
               selected={selected?.id === item.id}
               onClick={() => onSelect(item)}
+              activeTripId={activeTripId}
+              isInTrip={isInTrip(item)}
+              onDelete={onDeleteItem}
+              onToggleTrip={onToggleTrip}
             />
           ))
         )}

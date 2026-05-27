@@ -25,6 +25,9 @@ export interface SidebarProps {
   tripItemCount: number
   onDeactivateTrip: () => void
   scratchpadCount: number
+  isInTrip: (item: Item) => boolean
+  onDeleteItem: (item: Item) => void
+  onToggleTrip: (item: Item) => void
 }
 
 export function Sidebar({
@@ -43,6 +46,9 @@ export function Sidebar({
   tripItemCount,
   onDeactivateTrip,
   scratchpadCount,
+  isInTrip,
+  onDeleteItem,
+  onToggleTrip,
 }: SidebarProps) {
   const activeTrip = activeTripId ? trips.find((t) => t.id === activeTripId) ?? null : null
 
@@ -235,6 +241,10 @@ export function Sidebar({
         onSelect={onSelect}
         onOpenScratchpad={onOpenScratchpad}
         onStatusChange={handleStatusChange}
+        activeTripId={activeTripId}
+        isInTrip={isInTrip}
+        onDeleteItem={onDeleteItem}
+        onToggleTrip={onToggleTrip}
       />
 
       {/* 8. Footer */}

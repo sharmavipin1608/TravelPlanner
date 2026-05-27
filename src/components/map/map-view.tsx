@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps'
 import type { Item } from '@/types'
 import type { Filters } from '@/hooks/use-filters'
@@ -21,6 +21,8 @@ interface MapViewProps {
   selected: Item | null
   onSelect: (item: Item) => void
   onZoomTo: (dest: string) => void
+  activeTripId?: string | null
+  isInTrip?: (item: Item) => boolean
 }
 
 /** Returns true if item matches all active filters (not dimmed). */
@@ -45,6 +47,8 @@ function MapInner({
   selected,
   onSelect,
   onZoomTo,
+  activeTripId,
+  isInTrip,
 }: MapViewProps) {
   const map = useMap()
   const { mode, destination } = useMapMode(filters)
@@ -98,6 +102,44 @@ function MapInner({
     return groups
   }, [items])
 
+  // Auto-switch to local mode when the user zooms in past city level (~zoom 11)
+  const destGroupsRef = useRef(destGroups)
+  destGroupsRef.current = destGroups
+
+  useEffect(() => {
+    if (!map || filters.destination) return
+    const listener = map.addListener('zoom_changed', () => {
+      const zoom = map.getZoom() ?? 0
+      if (zoom < 11) return
+      const bounds = map.getBounds()
+      if (!bounds) return
+      const ne = bounds.getNorthEast()
+      const sw = bounds.getSouthWest()
+      const visible: string[] = []
+      for (const dest of Object.keys(destGroupsRef.current)) {
+        if (dest === '__unknown__') continue
+        const bbox = CITY_BBOX[dest]
+        if (!bbox) continue
+        const [lng, lat] = bbox.center
+        if (lat <= ne.lat() && lat >= sw.lat() && lng <= ne.lng() && lng >= sw.lng()) {
+          visible.push(dest)
+        }
+      }
+      if (visible.length === 0) return
+      const center = map.getCenter()!
+      const target = visible.reduce((best, curr) => {
+        const bC = CITY_BBOX[curr], bB = CITY_BBOX[best]
+        if (!bC || !bB) return best
+        const dC = Math.hypot(bC.center[1] - center.lat(), bC.center[0] - center.lng())
+        const dB = Math.hypot(bB.center[1] - center.lat(), bB.center[0] - center.lng())
+        return dC < dB ? curr : best
+      })
+      setFilters((f) => ({ ...f, destination: target }))
+    })
+    return () => { listener.remove() }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, filters.destination])
+
   // Items with lat/lng for local mode
   const localItems = useMemo(() => {
     if (mode !== 'local' || !destination) return []
@@ -131,16 +173,26 @@ function MapInner({
         })}
 
       {mode === 'local' &&
-        localItems.map((item) => (
-          <PinMarker
-            key={item.id}
-            item={item}
-            style={settings.pinStyle}
-            selected={selected?.id === item.id}
-            dimmed={!isShown(item, filters)}
-            onClick={() => onSelect(item)}
-          />
-        ))}
+        localItems.map((item) => {
+          const itemIsSelected = selected?.id === item.id
+          const itemInTrip = activeTripId ? (isInTrip?.(item) ?? false) : false
+          const dimmed = !itemIsSelected && (
+            activeTripId != null
+              ? !itemInTrip
+              : !isShown(item, filters)
+          )
+          return (
+            <PinMarker
+              key={item.id}
+              item={item}
+              style={settings.pinStyle}
+              selected={itemIsSelected}
+              dimmed={dimmed}
+              inTrip={itemInTrip}
+              onClick={() => onSelect(item)}
+            />
+          )
+        })}
 
       <MapBar
         mode={mode}

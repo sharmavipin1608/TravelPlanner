@@ -33,9 +33,9 @@ describe('mapPlaceType', () => {
 })
 
 describe('pinHTML', () => {
-  it('teardrop contains oklch color for restaurant', () => {
+  it('teardrop contains new crimson color for restaurant', () => {
     const html = pinHTML(mockItem, 'teardrop', false, false)
-    expect(html).toContain('oklch(0.62 0.16 14)')
+    expect(html).toContain('oklch(0.58 0.20 5)')
   })
   it('dimmed pin has opacity 0.25', () => {
     const html = pinHTML(mockItem, 'dot', false, true)
@@ -44,6 +44,10 @@ describe('pinHTML', () => {
   it('selected pin has drop-shadow', () => {
     const html = pinHTML(mockItem, 'ring', true, false)
     expect(html).toContain('drop-shadow')
+  })
+  it('inTrip pin has indigo drop-shadow', () => {
+    const html = pinHTML(mockItem, 'teardrop', false, false, true)
+    expect(html).toContain('oklch(0.55 0.18 280)')
   })
   it('null category pin does not throw', () => {
     const nullCatItem = { ...mockItem, category: null }

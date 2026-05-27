@@ -35,7 +35,7 @@ export function ItemCard({
   const hue = meta?.hue ?? 0
   const categoryLabel = meta?.label ?? 'Unknown'
 
-  const headerGradient = `linear-gradient(135deg, oklch(0.62 0.16 ${hue}) 0%, oklch(0.72 0.12 ${hue}) 100%)`
+  const headerGradient = `linear-gradient(135deg, ${meta?.color ?? `oklch(0.62 0.16 ${hue})`} 0%, oklch(0.72 0.12 ${hue}) 100%)`
   const placeholderGradient = `linear-gradient(135deg, oklch(0.68 0.14 ${hue}) 0%, oklch(0.76 0.10 ${hue}) 100%)`
 
   return (

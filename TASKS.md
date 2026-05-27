@@ -301,7 +301,7 @@ Write Playwright E2E specs (add-item, scratchpad 3-state, trip-planning). Config
 ---
 
 ### [TASK-024] Category color — single source of truth
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [colors]
@@ -313,7 +313,7 @@ Plan ref: Task 1 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-025] Map legend horizontal pill
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [components]
@@ -325,7 +325,7 @@ Plan ref: Task 2 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-026] Trip indigo color tokens
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [colors]
@@ -337,7 +337,7 @@ Plan ref: Task 3 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-027] Expose `tripItemIds` from `useTrip`
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [state]
@@ -349,7 +349,7 @@ Plan ref: Task 4 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-028] DELETE /api/items/[id]
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [api] [backend]
@@ -361,7 +361,7 @@ Plan ref: Task 5 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-029] PATCH /api/trips/[id]
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [api] [backend]
@@ -373,7 +373,7 @@ Plan ref: Task 6 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-030] DeleteConfirmModal component
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [components]
@@ -385,7 +385,7 @@ Plan ref: Task 7 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-031] ItemRow contextual action button
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [components]
@@ -397,7 +397,7 @@ Plan ref: Task 8 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-032] Thread props — ItemList, Sidebar, map/page.tsx + E2E delete test
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [refactor] [testing]
@@ -409,7 +409,7 @@ Plan ref: Task 9 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-033] Edit trip dates in TripsModal
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [components]
@@ -421,7 +421,7 @@ Plan ref: Task 10 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-034] Trip dashboard in TripsModal
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [components]
@@ -433,7 +433,7 @@ Plan ref: Task 11 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-035] Map pin trip indicator (PinMarker)
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [components]
@@ -445,7 +445,7 @@ Plan ref: Task 12 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-036] Wire pin indicator in MapView + map/page.tsx
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [refactor]

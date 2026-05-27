@@ -11,17 +11,18 @@ interface PinMarkerProps {
   style: PinStyle
   selected: boolean
   dimmed: boolean
+  inTrip?: boolean
   onClick: () => void
 }
 
-export function PinMarker({ item, style, selected, dimmed, onClick }: PinMarkerProps) {
+export function PinMarker({ item, style, selected, dimmed, inTrip, onClick }: PinMarkerProps) {
   const divRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (divRef.current) {
-      divRef.current.innerHTML = pinHTML(item, style, selected, dimmed)
+      divRef.current.innerHTML = pinHTML(item, style, selected, dimmed, inTrip ?? false)
     }
-  }, [item, style, selected, dimmed])
+  }, [item, style, selected, dimmed, inTrip])
 
   if (item.lat == null || item.lng == null) return null
 
