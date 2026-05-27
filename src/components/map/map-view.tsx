@@ -53,14 +53,44 @@ function MapInner({
   const map = useMap()
   const { mode, destination } = useMapMode(filters)
 
-  // Register global zoom handle after map loads
+  // Register global map handle after map loads
   useEffect(() => {
     if (!map) return
-    ;(window as unknown as { __tpMap?: { zoomIn: () => void; zoomOut: () => void } }).__tpMap = {
-      zoomIn: () => map.setZoom((map.getZoom() ?? 2) + 1),
+    ;(window as unknown as { __tpMap?: object }).__tpMap = {
+      zoomIn:  () => map.setZoom((map.getZoom() ?? 2) + 1),
       zoomOut: () => map.setZoom((map.getZoom() ?? 2) - 1),
+      setZoom: (z: number) => map.setZoom(z),
+      panTo:     (lat: number, lng: number) => map.panTo({ lat, lng }),
+      setCenter: (lat: number, lng: number) => map.setCenter({ lat, lng }),
+      fitBounds: (north: number, south: number, east: number, west: number) =>
+        map.fitBounds({ north, south, east, west }),
+      getZoom: () => map.getZoom(),
+      getBoundsDebug: () => {
+        const b = map.getBounds()
+        if (!b) return null
+        const ne = b.getNorthEast(), sw = b.getSouthWest()
+        return { neLat: ne.lat(), neLng: ne.lng(), swLat: sw.lat(), swLng: sw.lng() }
+      },
+      // Test hook: runs the auto-zoom distance logic with explicit coords,
+      // bypassing getCenter() which returns stale/wrong values in headless Chrome.
+      simulateIdle: (lat: number, lng: number, zoom: number) => {
+        if (zoom < 11) return
+        const MAX_DEG = 1.5
+        const dests = Object.keys(destGroupsRef.current).filter(d => d !== '__unknown__')
+        let target: string | null = null
+        let bestDist = MAX_DEG
+        for (const dest of dests) {
+          const bbox = CITY_BBOX[dest]
+          if (!bbox) continue
+          const [bLng, bLat] = bbox.center
+          const dist = Math.hypot(bLat - lat, bLng - lng)
+          if (dist < bestDist) { bestDist = dist; target = dest }
+        }
+        if (!target) return
+        setFilters((f) => ({ ...f, destination: target! }))
+      },
     }
-  }, [map])
+  }, [map, setFilters])
 
   // Fit bounds when destination changes in local mode
   useEffect(() => {
@@ -108,33 +138,32 @@ function MapInner({
 
   useEffect(() => {
     if (!map || filters.destination) return
-    const listener = map.addListener('zoom_changed', () => {
+    // Use 'idle' instead of 'zoom_changed': idle fires after the map has fully
+    // settled so getBounds() reflects the actual zoomed viewport (zoom_changed
+    // fires before the viewport is updated and getBounds() still returns the old bounds).
+    const listener = map.addListener('idle', () => {
       const zoom = map.getZoom() ?? 0
       if (zoom < 11) return
-      const bounds = map.getBounds()
-      if (!bounds) return
-      const ne = bounds.getNorthEast()
-      const sw = bounds.getSouthWest()
-      const visible: string[] = []
-      for (const dest of Object.keys(destGroupsRef.current)) {
-        if (dest === '__unknown__') continue
+      const center = map.getCenter()
+      if (!center) return
+      const cLat = center.lat(), cLng = center.lng()
+      // Find the destination whose cluster center is closest to the map center.
+      // We use degree distance rather than getBounds() because getBounds() can
+      // return stale values before the viewport has fully settled.
+      // At zoom 11+ we pick the nearest destination within ~1.5 degree radius.
+      const MAX_DEG = 1.5
+      const dests = Object.keys(destGroupsRef.current).filter(d => d !== '__unknown__')
+      let target: string | null = null
+      let bestDist = MAX_DEG
+      for (const dest of dests) {
         const bbox = CITY_BBOX[dest]
         if (!bbox) continue
         const [lng, lat] = bbox.center
-        if (lat <= ne.lat() && lat >= sw.lat() && lng <= ne.lng() && lng >= sw.lng()) {
-          visible.push(dest)
-        }
+        const dist = Math.hypot(lat - cLat, lng - cLng)
+        if (dist < bestDist) { bestDist = dist; target = dest }
       }
-      if (visible.length === 0) return
-      const center = map.getCenter()!
-      const target = visible.reduce((best, curr) => {
-        const bC = CITY_BBOX[curr], bB = CITY_BBOX[best]
-        if (!bC || !bB) return best
-        const dC = Math.hypot(bC.center[1] - center.lat(), bC.center[0] - center.lng())
-        const dB = Math.hypot(bB.center[1] - center.lat(), bB.center[0] - center.lng())
-        return dC < dB ? curr : best
-      })
-      setFilters((f) => ({ ...f, destination: target }))
+      if (!target) return
+      setFilters((f) => ({ ...f, destination: target! }))
     })
     return () => { listener.remove() }
   // eslint-disable-next-line react-hooks/exhaustive-deps
