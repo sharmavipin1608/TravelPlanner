@@ -21,6 +21,8 @@ interface MapViewProps {
   selected: Item | null
   onSelect: (item: Item) => void
   onZoomTo: (dest: string) => void
+  activeTripId?: string | null
+  isInTrip?: (item: Item) => boolean
 }
 
 /** Returns true if item matches all active filters (not dimmed). */
@@ -45,6 +47,8 @@ function MapInner({
   selected,
   onSelect,
   onZoomTo,
+  activeTripId,
+  isInTrip,
 }: MapViewProps) {
   const map = useMap()
   const { mode, destination } = useMapMode(filters)
@@ -131,16 +135,26 @@ function MapInner({
         })}
 
       {mode === 'local' &&
-        localItems.map((item) => (
-          <PinMarker
-            key={item.id}
-            item={item}
-            style={settings.pinStyle}
-            selected={selected?.id === item.id}
-            dimmed={!isShown(item, filters)}
-            onClick={() => onSelect(item)}
-          />
-        ))}
+        localItems.map((item) => {
+          const itemIsSelected = selected?.id === item.id
+          const itemInTrip = activeTripId ? (isInTrip?.(item) ?? false) : false
+          const dimmed = !itemIsSelected && (
+            activeTripId != null
+              ? !itemInTrip
+              : !isShown(item, filters)
+          )
+          return (
+            <PinMarker
+              key={item.id}
+              item={item}
+              style={settings.pinStyle}
+              selected={itemIsSelected}
+              dimmed={dimmed}
+              inTrip={itemInTrip}
+              onClick={() => onSelect(item)}
+            />
+          )
+        })}
 
       <MapBar
         mode={mode}

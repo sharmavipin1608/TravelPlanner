@@ -113,6 +113,8 @@ export default function MapPage() {
           selected={selected}
           onSelect={setSelected}
           onZoomTo={(dest) => setFilters((f) => ({ ...f, destination: dest }))}
+          activeTripId={activeTripId}
+          isInTrip={isInTrip}
         />
 
         {selected && (
