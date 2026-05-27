@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import type { Item, ApiResponse } from '@/types'
+import type { ApiResponse } from '@/types'
 
 export async function DELETE(
   _request: NextRequest,
@@ -33,7 +33,7 @@ export async function DELETE(
 
     if (!data || data.length === 0) {
       return Response.json(
-        { data: null, error: { code: 'NOT_FOUND', message: 'Item not found' } } satisfies ApiResponse<null>,
+        { data: null, error: { code: 'not_found', message: 'Item not found' } } satisfies ApiResponse<null>,
         { status: 404 }
       )
     }
