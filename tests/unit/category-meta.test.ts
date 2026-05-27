@@ -14,6 +14,9 @@ describe('CATEGORY_META color field', () => {
   it('activity color unchanged', () => {
     expect(CATEGORY_META.activity.color).toBe('oklch(0.62 0.16 152)')
   })
+  it('place hue is 45 (amber, was 36)', () => {
+    expect(CATEGORY_META.place.hue).toBe(45)
+  })
   it('all categories have a color field', () => {
     for (const meta of Object.values(CATEGORY_META)) {
       expect(meta.color).toMatch(/^oklch/)

@@ -167,9 +167,9 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
                 )}
                 {/* Date section */}
                 <div
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}
                   onClick={(e) => e.stopPropagation()}
                 >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
                   {editingId === trip.id ? (
                     <>
                       <input
@@ -197,8 +197,8 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
                       <div
                         role="button"
                         tabIndex={0}
-                        onClick={(e) => { e.stopPropagation(); setEditingId(null) }}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); setEditingId(null) } }}
+                        onClick={(e) => { e.stopPropagation(); setEditingId(null); setError(null) }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); setEditingId(null); setError(null) } }}
                         style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, border: '1px solid var(--paper-3)', background: 'var(--paper-2)', color: 'var(--ink)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
                       >
                         Cancel
@@ -224,6 +224,10 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
                         <Icon name="edit" size={12} stroke="var(--ink-3)" />
                       </div>
                     </>
+                  )}
+                  </div>
+                  {editingId === trip.id && error && (
+                    <p style={{ margin: '4px 0 0', fontSize: 12, color: '#c0392b' }}>{error}</p>
                   )}
                 </div>
               </div>
