@@ -28,7 +28,7 @@ export default function MapPage() {
 
   const { filters, setFilters } = useFilters()
   const [settings, updateSetting] = useSettings()
-  const { activeTripId, activeTrip, isInTrip, toggleItemInTrip, activateTrip, tripItemCount } = useTrip(trips)
+  const { activeTripId, activeTrip, isInTrip, toggleItemInTrip, activateTrip, tripItemCount, tripItemIds } = useTrip(trips)
 
   useBackfillCoords(items, (updated) => {
     setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))
@@ -192,6 +192,8 @@ export default function MapPage() {
           onActivate={(tripId) => { activateTrip(tripId); setModal(null) }}
           onClose={() => setModal(null)}
           onTripsUpdated={setTrips}
+          items={items}
+          tripItemIds={tripItemIds}
         />
       )}
 
