@@ -8,13 +8,13 @@ interface ItemRowProps {
   item: Item
   selected: boolean
   onClick: () => void
-  activeTripId: string | null
-  isInTrip: boolean
-  onDelete: (item: Item) => void
-  onToggleTrip: (item: Item) => void
+  activeTripId?: string | null
+  isInTrip?: boolean
+  onDelete?: (item: Item) => void
+  onToggleTrip?: (item: Item) => void
 }
 
-export function ItemRow({ item, selected, onClick, activeTripId, isInTrip, onDelete, onToggleTrip }: ItemRowProps) {
+export function ItemRow({ item, selected, onClick, activeTripId = null, isInTrip = false, onDelete = () => {}, onToggleTrip = () => {} }: ItemRowProps) {
   const meta = item.category ? CATEGORY_META[item.category] : null
   const categoryColor = meta?.color ?? 'oklch(0.62 0.16 0)'
 
