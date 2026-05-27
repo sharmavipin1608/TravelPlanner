@@ -65,20 +65,26 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
   }
 
   async function handleSaveDates(tripId: string) {
-    const res = await fetch(`/api/trips/${tripId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        start_date: editDraft.start_date || null,
-        end_date: editDraft.end_date || null,
-      }),
-    })
-    if (res.ok) {
+    try {
+      const res = await fetch(`/api/trips/${tripId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          start_date: editDraft.start_date || null,
+          end_date: editDraft.end_date || null,
+        }),
+      })
+      if (!res.ok) {
+        setError('Failed to save dates. Please try again.')
+        return
+      }
       const { data } = await res.json()
       const updated = localTrips.map((t) => (t.id === tripId ? data : t))
       setLocalTrips(updated)
       onTripsUpdated(updated)
       setEditingId(null)
+    } catch {
+      setError('Network error. Please try again.')
     }
   }
 
@@ -179,35 +185,44 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
                         onChange={(e) => setEditDraft((d) => ({ ...d, end_date: e.target.value }))}
                         style={{ fontSize: 12, padding: '2px 6px', borderRadius: 4, border: '1px solid var(--paper-3)', background: 'var(--paper-2)', color: 'var(--ink)' }}
                       />
-                      <button
-                        onClick={() => handleSaveDates(trip.id)}
-                        style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, border: 'none', background: 'oklch(0.55 0.18 280)', color: '#fff', cursor: 'pointer' }}
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); handleSaveDates(trip.id) }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); handleSaveDates(trip.id) } }}
+                        style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'oklch(0.55 0.18 280)', color: '#fff', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
                       >
                         Save
-                      </button>
-                      <button
-                        onClick={() => setEditingId(null)}
-                        style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, border: '1px solid var(--paper-3)', background: 'var(--paper-2)', color: 'var(--ink)', cursor: 'pointer' }}
+                      </div>
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); setEditingId(null) }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); setEditingId(null) } }}
+                        style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, border: '1px solid var(--paper-3)', background: 'var(--paper-2)', color: 'var(--ink)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
                       >
                         Cancel
-                      </button>
+                      </div>
                     </>
                   ) : (
                     <>
                       <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                         {trip.start_date ? `${trip.start_date}` : 'No start'} → {trip.end_date ? `${trip.end_date}` : 'No end'}
                       </span>
-                      <button
+                      <div
+                        role="button"
+                        tabIndex={0}
                         onClick={(e) => {
                           e.stopPropagation()
                           setEditingId(trip.id)
                           setEditDraft({ start_date: trip.start_date ?? '', end_date: trip.end_date ?? '' })
                         }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); setEditingId(trip.id); setEditDraft({ start_date: trip.start_date ?? '', end_date: trip.end_date ?? '' }) } }}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }}
                         title="Edit dates"
                       >
                         <Icon name="edit" size={12} stroke="var(--ink-3)" />
-                      </button>
+                      </div>
                     </>
                   )}
                 </div>
