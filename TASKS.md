@@ -397,7 +397,7 @@ Plan ref: Task 8 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-032] Thread props — ItemList, Sidebar, map/page.tsx + E2E delete test
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [refactor] [testing]
