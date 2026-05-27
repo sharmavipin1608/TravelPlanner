@@ -385,7 +385,7 @@ Plan ref: Task 7 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-031] ItemRow contextual action button
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [components]
