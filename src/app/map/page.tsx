@@ -15,6 +15,7 @@ import { AutocompleteAdd } from '@/components/modals/autocomplete-add'
 import { Scratchpad } from '@/components/modals/scratchpad'
 import { TripsModal } from '@/components/modals/trips-modal'
 import { SettingsModal } from '@/components/modals/settings-modal'
+import { DeleteConfirmModal } from '@/components/modals/delete-confirm-modal'
 
 export default function MapPage() {
   const [items, setItems] = useState<Item[]>([])
@@ -23,6 +24,7 @@ export default function MapPage() {
   const [selected, setSelected] = useState<Item | null>(null)
   const [modal, setModal] = useState<'autocomplete' | 'manual' | 'scratchpad' | 'trips' | 'settings' | null>(null)
   const [addMenuOpen, setAddMenuOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<Item | null>(null)
 
   const { filters, setFilters } = useFilters()
   const [settings, updateSetting] = useSettings()
@@ -37,6 +39,16 @@ export default function MapPage() {
       .then((r) => r.json())
       .then((json) => { if (json.data) setItems(json.data) })
       .catch(() => {})
+  }
+
+  async function handleDeleteItem() {
+    if (!deleteTarget) return
+    const res = await fetch(`/api/items/${deleteTarget.id}`, { method: 'DELETE' })
+    if (res.ok) {
+      setItems((prev) => prev.filter((i) => i.id !== deleteTarget.id))
+      if (selected?.id === deleteTarget.id) setSelected(null)
+      setDeleteTarget(null)
+    }
   }
 
   async function handleToggleTrip(item: Item) {
@@ -79,7 +91,18 @@ export default function MapPage() {
         tripItemCount={tripItemCount}
         onDeactivateTrip={() => activateTrip(null)}
         scratchpadCount={scratchpadEntries.length}
+        isInTrip={isInTrip}
+        onDeleteItem={(item) => setDeleteTarget(item)}
+        onToggleTrip={toggleItemInTrip}
       />
+
+      {deleteTarget && (
+        <DeleteConfirmModal
+          item={deleteTarget}
+          onConfirm={handleDeleteItem}
+          onClose={() => setDeleteTarget(null)}
+        />
+      )}
 
       <div style={{ flex: 1, position: 'relative' }}>
         <MapView
