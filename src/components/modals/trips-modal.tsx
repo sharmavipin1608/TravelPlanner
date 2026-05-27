@@ -13,15 +13,6 @@ interface TripsModalProps {
   onTripsUpdated: (trips: Trip[]) => void
 }
 
-function formatDateRange(startDate: string | null, endDate: string | null): string | null {
-  if (!startDate && !endDate) return null
-  const fmt = (d: string) =>
-    new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  if (startDate && endDate) return `${fmt(startDate)} – ${fmt(endDate)}`
-  if (startDate) return `From ${fmt(startDate)}`
-  if (endDate) return `Until ${fmt(endDate)}`
-  return null
-}
 
 export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUpdated }: TripsModalProps) {
   const [localTrips, setLocalTrips] = useState<Trip[]>(trips)
@@ -32,6 +23,8 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
   const [endDate, setEndDate] = useState('')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editDraft, setEditDraft] = useState<{ start_date: string; end_date: string }>({ start_date: '', end_date: '' })
 
   async function handleCreate() {
     const trimmedName = name.trim()
@@ -68,6 +61,24 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
       setError('Network error. Please try again.')
     } finally {
       setCreating(false)
+    }
+  }
+
+  async function handleSaveDates(tripId: string) {
+    const res = await fetch(`/api/trips/${tripId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        start_date: editDraft.start_date || null,
+        end_date: editDraft.end_date || null,
+      }),
+    })
+    if (res.ok) {
+      const { data } = await res.json()
+      const updated = localTrips.map((t) => (t.id === tripId ? data : t))
+      setLocalTrips(updated)
+      onTripsUpdated(updated)
+      setEditingId(null)
     }
   }
 
@@ -108,11 +119,7 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
         {/* Trip list */}
         {localTrips.map((trip) => {
           const isActive = trip.id === activeTripId
-          const dateRange = formatDateRange(trip.start_date, trip.end_date)
-          const meta = [
-            trip.destination ? trip.destination.split(',')[0] : null,
-            dateRange,
-          ].filter(Boolean).join(' · ')
+          const destinationLabel = trip.destination ? trip.destination.split(',')[0] : null
 
           return (
             <button
@@ -136,7 +143,7 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
                 transition: 'border-color .12s, background .12s',
               }}
             >
-              <div>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   style={{
                     fontFamily: 'var(--font-serif)',
@@ -147,11 +154,63 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
                 >
                   {trip.name}
                 </div>
-                {meta && (
+                {destinationLabel && (
                   <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 3 }}>
-                    {meta}
+                    {destinationLabel}
                   </div>
                 )}
+                {/* Date section */}
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {editingId === trip.id ? (
+                    <>
+                      <input
+                        type="date"
+                        value={editDraft.start_date}
+                        onChange={(e) => setEditDraft((d) => ({ ...d, start_date: e.target.value }))}
+                        style={{ fontSize: 12, padding: '2px 6px', borderRadius: 4, border: '1px solid var(--paper-3)', background: 'var(--paper-2)', color: 'var(--ink)' }}
+                      />
+                      <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>→</span>
+                      <input
+                        type="date"
+                        value={editDraft.end_date}
+                        onChange={(e) => setEditDraft((d) => ({ ...d, end_date: e.target.value }))}
+                        style={{ fontSize: 12, padding: '2px 6px', borderRadius: 4, border: '1px solid var(--paper-3)', background: 'var(--paper-2)', color: 'var(--ink)' }}
+                      />
+                      <button
+                        onClick={() => handleSaveDates(trip.id)}
+                        style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, border: 'none', background: 'oklch(0.55 0.18 280)', color: '#fff', cursor: 'pointer' }}
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, border: '1px solid var(--paper-3)', background: 'var(--paper-2)', color: 'var(--ink)', cursor: 'pointer' }}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>
+                        {trip.start_date ? `${trip.start_date}` : 'No start'} → {trip.end_date ? `${trip.end_date}` : 'No end'}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setEditingId(trip.id)
+                          setEditDraft({ start_date: trip.start_date ?? '', end_date: trip.end_date ?? '' })
+                        }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }}
+                        title="Edit dates"
+                      >
+                        <Icon name="edit" size={12} stroke="var(--ink-3)" />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
               <div style={{ color: 'var(--ink-3)', flexShrink: 0, marginLeft: 12 }}>
                 {isActive ? (
