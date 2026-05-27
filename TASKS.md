@@ -337,7 +337,7 @@ Plan ref: Task 3 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-027] Expose `tripItemIds` from `useTrip`
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [state]
