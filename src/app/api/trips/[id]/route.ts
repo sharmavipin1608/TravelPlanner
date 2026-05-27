@@ -47,6 +47,12 @@ export async function PATCH(
       .single()
 
     if (error) {
+      if (error.code === 'PGRST116') {
+        return Response.json(
+          { data: null, error: { code: 'not_found', message: 'Trip not found' } } satisfies ApiResponse<null>,
+          { status: 404 }
+        )
+      }
       return Response.json(
         { data: null, error: { code: 'db_error', message: 'Internal server error' } } satisfies ApiResponse<null>,
         { status: 500 }
