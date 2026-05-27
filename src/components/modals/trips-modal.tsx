@@ -9,7 +9,7 @@ import { CATEGORY_META } from '@/lib/google-maps/category-meta'
 interface TripsModalProps {
   trips: Trip[]
   activeTripId: string | null
-  onActivate: (tripId: string) => void
+  onActivate: (tripId: string | null) => void
   onClose: () => void
   onTripsUpdated: (trips: Trip[]) => void
   items: Item[]
@@ -92,8 +92,7 @@ export function TripsModal({ trips, activeTripId, onActivate, onClose, onTripsUp
   }
 
   function handleRowClick(tripId: string) {
-    onActivate(tripId)
-    onClose()
+    onActivate(tripId === activeTripId ? null : tripId)
   }
 
   return (

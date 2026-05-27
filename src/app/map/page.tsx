@@ -191,7 +191,7 @@ export default function MapPage() {
         <TripsModal
           trips={trips}
           activeTripId={activeTripId}
-          onActivate={(tripId) => { activateTrip(tripId); setModal(null) }}
+          onActivate={(tripId) => { activateTrip(tripId) }}
           onClose={() => setModal(null)}
           onTripsUpdated={setTrips}
           items={items}
