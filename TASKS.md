@@ -409,7 +409,7 @@ Plan ref: Task 9 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-033] Edit trip dates in TripsModal
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [components]
