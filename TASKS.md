@@ -445,7 +445,7 @@ Plan ref: Task 12 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-036] Wire pin indicator in MapView + map/page.tsx
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [refactor]
