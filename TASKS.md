@@ -373,7 +373,7 @@ Plan ref: Task 6 in docs/superpowers/plans/2026-05-26-phase1-enhancements.md
 ---
 
 ### [TASK-030] DeleteConfirmModal component
-**Status:** pending
+**Status:** completed
 **Priority:** high
 **Agent:** coder
 **Tags:** [ui] [components]
