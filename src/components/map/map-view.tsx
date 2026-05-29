@@ -73,17 +73,24 @@ function MapInner({
       },
       // Test hook: runs the auto-zoom distance logic with explicit coords,
       // bypassing getCenter() which returns stale/wrong values in headless Chrome.
-      simulateIdle: (lat: number, lng: number, zoom: number) => {
+      simulateIdle: (cLat: number, cLng: number, zoom: number) => {
         if (zoom < 11) return
         const MAX_DEG = 1.5
         const dests = Object.keys(destGroupsRef.current).filter(d => d !== '__unknown__')
         let target: string | null = null
         let bestDist = MAX_DEG
         for (const dest of dests) {
+          let bLat: number, bLng: number
           const bbox = CITY_BBOX[dest]
-          if (!bbox) continue
-          const [bLng, bLat] = bbox.center
-          const dist = Math.hypot(bLat - lat, bLng - lng)
+          if (bbox) {
+            ;[bLng, bLat] = bbox.center
+          } else {
+            const coordItems = destGroupsRef.current[dest].filter(i => i.lat != null && i.lng != null)
+            if (coordItems.length === 0) continue
+            bLat = coordItems.reduce((s, i) => s + i.lat!, 0) / coordItems.length
+            bLng = coordItems.reduce((s, i) => s + i.lng!, 0) / coordItems.length
+          }
+          const dist = Math.hypot(bLat - cLat, bLng - cLng)
           if (dist < bestDist) { bestDist = dist; target = dest }
         }
         if (!target) return
@@ -156,9 +163,17 @@ function MapInner({
       let target: string | null = null
       let bestDist = MAX_DEG
       for (const dest of dests) {
+        let lat: number, lng: number
         const bbox = CITY_BBOX[dest]
-        if (!bbox) continue
-        const [lng, lat] = bbox.center
+        if (bbox) {
+          ;[lng, lat] = bbox.center
+        } else {
+          // Destination not in CITY_BBOX — use centroid of items with coordinates
+          const coordItems = destGroupsRef.current[dest].filter(i => i.lat != null && i.lng != null)
+          if (coordItems.length === 0) continue
+          lat = coordItems.reduce((s, i) => s + i.lat!, 0) / coordItems.length
+          lng = coordItems.reduce((s, i) => s + i.lng!, 0) / coordItems.length
+        }
         const dist = Math.hypot(lat - cLat, lng - cLng)
         if (dist < bestDist) { bestDist = dist; target = dest }
       }
