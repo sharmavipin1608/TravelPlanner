@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useCallback } from 'react'
 import { AdvancedMarker } from '@vis.gl/react-google-maps'
 import type { Item } from '@/types'
 import type { PinStyle } from '@/lib/google-maps/pin-html'
@@ -16,11 +16,12 @@ interface PinMarkerProps {
 }
 
 export function PinMarker({ item, style, selected, dimmed, inTrip, onClick }: PinMarkerProps) {
-  const divRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (divRef.current) {
-      divRef.current.innerHTML = pinHTML(item, style, selected, dimmed, inTrip ?? false)
+  // Ref callback instead of useRef+useEffect: AdvancedMarker creates its portal
+  // container in a useEffect (async), so the div only mounts on the second render.
+  // A plain useEffect with unchanged deps would not re-run at that point.
+  const contentRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      node.innerHTML = pinHTML(item, style, selected, dimmed, inTrip ?? false)
     }
   }, [item, style, selected, dimmed, inTrip])
 
@@ -32,7 +33,7 @@ export function PinMarker({ item, style, selected, dimmed, inTrip, onClick }: Pi
       zIndex={selected ? 10 : 1}
       onClick={onClick}
     >
-      <div ref={divRef} />
+      <div ref={contentRef} />
     </AdvancedMarker>
   )
 }

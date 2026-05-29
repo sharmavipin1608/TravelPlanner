@@ -117,11 +117,17 @@ function MapInner({
         (i) => i.destination === destination && i.lat != null && i.lng != null
       )
       if (localItems.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const googleMaps = (window as unknown as { google: { maps: any } }).google.maps
-        const bounds = new googleMaps.LatLngBounds()
-        localItems.forEach((i) => bounds.extend({ lat: i.lat!, lng: i.lng! }))
-        map.fitBounds(bounds)
+        if (localItems.length === 1) {
+          // fitBounds on a zero-area bounds zooms to max (22+); use a fixed city zoom instead
+          map.setCenter({ lat: localItems[0].lat!, lng: localItems[0].lng! })
+          map.setZoom(14)
+        } else {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const googleMaps = (window as unknown as { google: { maps: any } }).google.maps
+          const bounds = new googleMaps.LatLngBounds()
+          localItems.forEach((i) => bounds.extend({ lat: i.lat!, lng: i.lng! }))
+          map.fitBounds(bounds)
+        }
       }
     }
   // destination and mode are the meaningful triggers; map and items refs are stable
